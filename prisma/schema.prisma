@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum StatusSessao {
+  EM_ANDAMENTO
+  CONCLUIDA
+  CANCELADA
+}
+
+model Exercicio {
+  id            String            @id @default(cuid())
+  nome          String
+  grupoMuscular String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  treinos       TreinoExercicio[]
+  series        SerieRegistrada[]
+}
+
+model Treino {
+  id         String            @id @default(cuid())
+  nome       String
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  exercicios TreinoExercicio[]
+  sessoes    Sessao[]
+}
+
+model TreinoExercicio {
+  id          String    @id @default(cuid())
+  treinoId    String
+  exercicioId String
+  seriesAlvo  Int
+  repsAlvo    Int
+  ordem       Int       @default(0)
+  treino      Treino    @relation(fields: [treinoId], references: [id], onDelete: Cascade)
+  exercicio   Exercicio @relation(fields: [exercicioId], references: [id], onDelete: Restrict)
+
+  @@unique([treinoId, exercicioId])
+  @@index([exercicioId])
+}
+
+model Sessao {
+  id         String            @id @default(cuid())
+  treinoId   String
+  data       DateTime          @default(now())
+  duracaoMin Int?
+  status     StatusSessao      @default(EM_ANDAMENTO)
+  createdAt  DateTime          @default(now())
+  treino     Treino            @relation(fields: [treinoId], references: [id], onDelete: Cascade)
+  series     SerieRegistrada[]
+
+  @@index([treinoId, data])
+}
+
+model SerieRegistrada {
+  id          String    @id @default(cuid())
+  sessaoId    String
+  exercicioId String
+  numero      Int
+  carga       Decimal   @db.Decimal(6, 2)
+  reps        Int
+  sessao      Sessao    @relation(fields: [sessaoId], references: [id], onDelete: Cascade)
+  exercicio   Exercicio @relation(fields: [exercicioId], references: [id], onDelete: Restrict)
+
+  @@index([exercicioId])
+  @@index([sessaoId])
+}
