@@ -22,3 +22,47 @@ export async function getTreinos(): Promise<TreinoResumo[]> {
     totalExercicios: t._count.exercicios,
   }));
 }
+
+export interface ExercicioDoTreino {
+  treinoExercicioId: string;
+  nome: string;
+  grupoMuscular: string;
+  seriesAlvo: number;
+  repsAlvo: number;
+}
+
+export interface TreinoDetalhe {
+  id: string;
+  nome: string;
+  exercicios: ExercicioDoTreino[];
+}
+
+/**
+ * Busca um treino pelo id com seus exercícios (via TreinoExercicio → Exercicio),
+ * ordenados por `ordem`. Retorna `null` se o treino não existir.
+ */
+export async function getTreino(id: string): Promise<TreinoDetalhe | null> {
+  const treino = await prisma.treino.findUnique({
+    where: { id },
+    include: {
+      exercicios: {
+        orderBy: { ordem: "asc" },
+        include: { exercicio: true },
+      },
+    },
+  });
+
+  if (!treino) return null;
+
+  return {
+    id: treino.id,
+    nome: treino.nome,
+    exercicios: treino.exercicios.map((te) => ({
+      treinoExercicioId: te.id,
+      nome: te.exercicio.nome,
+      grupoMuscular: te.exercicio.grupoMuscular,
+      seriesAlvo: te.seriesAlvo,
+      repsAlvo: te.repsAlvo,
+    })),
+  };
+}
