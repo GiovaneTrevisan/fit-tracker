@@ -1,4 +1,5 @@
 import { getTreinos } from "@/lib/treinos";
+import { CriarTreinoForm } from "./criar-treino-form";
 
 export default async function TreinosPage() {
   const treinos = await getTreinos();
@@ -8,6 +9,8 @@ export default async function TreinosPage() {
       <h1 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
         Treinos
       </h1>
+
+      <CriarTreinoForm />
 
       {treinos.length === 0 ? (
         <p className="mt-6 text-zinc-600 dark:text-zinc-400">
