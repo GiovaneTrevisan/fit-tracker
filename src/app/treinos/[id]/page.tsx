@@ -38,7 +38,12 @@ export default async function TreinoDetalhePage({
         </p>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
-          {treino.exercicios.map((ex) => (
+          {treino.exercicios.map((ex) => {
+            const reps =
+              ex.repsAlvoMin === ex.repsAlvoMax
+                ? `${ex.repsAlvoMin}`
+                : `${ex.repsAlvoMin}–${ex.repsAlvoMax}`;
+            return (
             <li
               key={ex.treinoExercicioId}
               className="flex items-center justify-between gap-4 rounded-lg border border-black/[.08] px-4 py-3 dark:border-white/[.145]"
@@ -48,7 +53,7 @@ export default async function TreinoDetalhePage({
                   {ex.nome}
                 </p>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  {ex.grupoMuscular} · {ex.seriesAlvo}x{ex.repsAlvo}
+                  {ex.grupoMuscular} · {ex.seriesAlvo} séries · {reps} reps
                 </p>
               </div>
               <form action={removerAction}>
@@ -66,7 +71,8 @@ export default async function TreinoDetalhePage({
                 </button>
               </form>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
 

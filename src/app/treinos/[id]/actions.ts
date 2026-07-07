@@ -17,7 +17,8 @@ export async function adicionarExercicio(
   const nome = String(formData.get("nome") ?? "").trim();
   const grupoMuscular = String(formData.get("grupoMuscular") ?? "").trim();
   const seriesAlvo = Number(formData.get("seriesAlvo"));
-  const repsAlvo = Number(formData.get("repsAlvo"));
+  const repsAlvoMin = Number(formData.get("repsAlvoMin"));
+  const repsAlvoMax = Number(formData.get("repsAlvoMax"));
 
   if (treinoId === "") {
     return { error: "Treino inválido" };
@@ -28,8 +29,14 @@ export async function adicionarExercicio(
   if (!Number.isInteger(seriesAlvo) || seriesAlvo < 1) {
     return { error: "Séries alvo deve ser um inteiro maior que zero" };
   }
-  if (!Number.isInteger(repsAlvo) || repsAlvo < 1) {
-    return { error: "Reps alvo deve ser um inteiro maior que zero" };
+  if (!Number.isInteger(repsAlvoMin) || repsAlvoMin < 1) {
+    return { error: "Reps mínimo deve ser um inteiro maior que zero" };
+  }
+  if (!Number.isInteger(repsAlvoMax) || repsAlvoMax < 1) {
+    return { error: "Reps máximo deve ser um inteiro maior que zero" };
+  }
+  if (repsAlvoMin > repsAlvoMax) {
+    return { error: "Reps mínimo não pode ser maior que o máximo" };
   }
 
   // Reutiliza o exercício do catálogo se já existir (case-insensitive).
@@ -63,7 +70,14 @@ export async function adicionarExercicio(
   const ordem = (ultimo._max.ordem ?? -1) + 1;
 
   await prisma.treinoExercicio.create({
-    data: { treinoId, exercicioId: exercicio.id, seriesAlvo, repsAlvo, ordem },
+    data: {
+      treinoId,
+      exercicioId: exercicio.id,
+      seriesAlvo,
+      repsAlvoMin,
+      repsAlvoMax,
+      ordem,
+    },
   });
 
   revalidatePath(`/treinos/${treinoId}`);
