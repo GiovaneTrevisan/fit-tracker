@@ -36,7 +36,8 @@ model TreinoExercicio {
   treinoId    String
   exercicioId String
   seriesAlvo  Int
-  repsAlvo    Int
+  repsAlvoMin Int
+  repsAlvoMax Int
   ordem       Int       @default(0)
   treino      Treino    @relation(fields: [treinoId], references: [id], onDelete: Cascade)
   exercicio   Exercicio @relation(fields: [exercicioId], references: [id], onDelete: Restrict)

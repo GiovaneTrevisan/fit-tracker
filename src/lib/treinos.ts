@@ -28,7 +28,8 @@ export interface ExercicioDoTreino {
   nome: string;
   grupoMuscular: string;
   seriesAlvo: number;
-  repsAlvo: number;
+  repsAlvoMin: number;
+  repsAlvoMax: number;
 }
 
 export interface TreinoDetalhe {
@@ -62,7 +63,8 @@ export async function getTreino(id: string): Promise<TreinoDetalhe | null> {
       nome: te.exercicio.nome,
       grupoMuscular: te.exercicio.grupoMuscular,
       seriesAlvo: te.seriesAlvo,
-      repsAlvo: te.repsAlvo,
+      repsAlvoMin: te.repsAlvoMin,
+      repsAlvoMax: te.repsAlvoMax,
     })),
   };
 }

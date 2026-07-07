@@ -53,9 +53,16 @@ export function AdicionarExercicioForm({ treinoId }: { treinoId: string }) {
         />
         <input
           type="number"
-          name="repsAlvo"
+          name="repsAlvoMin"
           min={1}
-          placeholder="Reps alvo"
+          placeholder="Reps mín"
+          className={`${inputClass} w-32`}
+        />
+        <input
+          type="number"
+          name="repsAlvoMax"
+          min={1}
+          placeholder="Reps máx"
           className={`${inputClass} w-32`}
         />
         <button
