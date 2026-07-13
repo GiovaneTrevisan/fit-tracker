@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getSessao } from "@/lib/sessoes";
 import { getUltimaVez } from "@/lib/ultima-vez";
 import { AnotarSerieForm } from "./anotar-serie-form";
-import { removerSerie } from "./actions";
+import { concluirSessao, removerSerie } from "./actions";
 
 const STATUS_LABEL: Record<string, string> = {
   EM_ANDAMENTO: "Em andamento",
@@ -25,9 +25,16 @@ export default async function SessaoDetalhePage({
     sessao.exercicios.map((ex) => getUltimaVez(ex.exercicioId, sessao.id)),
   );
 
+  const emAndamento = sessao.status === "EM_ANDAMENTO";
+
   async function removerSerieAction(formData: FormData) {
     "use server";
     await removerSerie(formData);
+  }
+
+  async function concluirAction(formData: FormData) {
+    "use server";
+    await concluirSessao(String(formData.get("sessaoId") ?? ""));
   }
 
   return (
@@ -39,9 +46,16 @@ export default async function SessaoDetalhePage({
         ← Voltar ao treino
       </Link>
 
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
-        {sessao.treinoNome}
-      </h1>
+      <div className="mt-2 flex items-center gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
+          {sessao.treinoNome}
+        </h1>
+        {sessao.status === "CONCLUIDA" && (
+          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/40 dark:text-green-400">
+            Concluída
+          </span>
+        )}
+      </div>
 
       <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
         {sessao.data.toLocaleDateString("pt-BR")} ·{" "}
@@ -95,33 +109,49 @@ export default async function SessaoDetalhePage({
                         <span>
                           #{s.numero} — {s.carga}kg × {s.reps}
                         </span>
-                        <form action={removerSerieAction}>
-                          <input type="hidden" name="serieId" value={s.id} />
-                          <input
-                            type="hidden"
-                            name="sessaoId"
-                            value={sessao.id}
-                          />
-                          <button
-                            type="submit"
-                            className="text-sm text-red-600 hover:underline dark:text-red-400"
-                          >
-                            Remover
-                          </button>
-                        </form>
+                        {emAndamento && (
+                          <form action={removerSerieAction}>
+                            <input type="hidden" name="serieId" value={s.id} />
+                            <input
+                              type="hidden"
+                              name="sessaoId"
+                              value={sessao.id}
+                            />
+                            <button
+                              type="submit"
+                              className="text-sm text-red-600 hover:underline dark:text-red-400"
+                            >
+                              Remover
+                            </button>
+                          </form>
+                        )}
                       </li>
                     ))}
                   </ul>
                 )}
 
-                <AnotarSerieForm
-                  sessaoId={sessao.id}
-                  exercicioId={ex.exercicioId}
-                />
+                {emAndamento && (
+                  <AnotarSerieForm
+                    sessaoId={sessao.id}
+                    exercicioId={ex.exercicioId}
+                  />
+                )}
               </li>
             );
           })}
         </ul>
+      )}
+
+      {emAndamento && (
+        <form action={concluirAction} className="mt-8">
+          <input type="hidden" name="sessaoId" value={sessao.id} />
+          <button
+            type="submit"
+            className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+          >
+            Concluir treino
+          </button>
+        </form>
       )}
     </main>
   );
