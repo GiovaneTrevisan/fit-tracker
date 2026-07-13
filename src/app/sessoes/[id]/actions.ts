@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 export type SerieResult = { ok: true } | { error: string };
@@ -59,4 +60,33 @@ export async function removerSerie(
 
   revalidatePath(`/sessoes/${sessaoId}`);
   return { ok: true };
+}
+
+/**
+ * Conclui a sessão: muda o status para CONCLUIDA. Só conclui se estiver
+ * EM_ANDAMENTO (se já estiver CONCLUIDA, apenas redireciona, sem erro).
+ * Redireciona para a página do treino da sessão.
+ */
+export async function concluirSessao(sessaoId: string): Promise<never> {
+  if (!sessaoId) {
+    throw new Error("Sessão inválida");
+  }
+
+  const sessao = await prisma.sessao.findUnique({
+    where: { id: sessaoId },
+    select: { treinoId: true, status: true },
+  });
+  if (!sessao) {
+    throw new Error("Sessão não encontrada");
+  }
+
+  // Só conclui se estiver em andamento; se já concluída, apenas redireciona.
+  if (sessao.status === "EM_ANDAMENTO") {
+    await prisma.sessao.update({
+      where: { id: sessaoId },
+      data: { status: "CONCLUIDA" },
+    });
+  }
+
+  redirect(`/treinos/${sessao.treinoId}`);
 }
