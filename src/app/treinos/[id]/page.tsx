@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTreino } from "@/lib/treinos";
+import { iniciarSessao } from "@/app/sessoes/actions";
 import { AdicionarExercicioForm } from "./adicionar-exercicio-form";
 import { removerExercicio } from "./actions";
 
@@ -19,6 +20,11 @@ export default async function TreinoDetalhePage({
     await removerExercicio(formData);
   }
 
+  async function iniciarAction(formData: FormData) {
+    "use server";
+    await iniciarSessao(String(formData.get("treinoId") ?? ""));
+  }
+
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-12">
       <Link
@@ -31,6 +37,16 @@ export default async function TreinoDetalhePage({
       <h1 className="mt-2 text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
         {treino.nome}
       </h1>
+
+      <form action={iniciarAction} className="mt-4">
+        <input type="hidden" name="treinoId" value={treino.id} />
+        <button
+          type="submit"
+          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+        >
+          Iniciar treino
+        </button>
+      </form>
 
       {treino.exercicios.length === 0 ? (
         <p className="mt-6 text-zinc-600 dark:text-zinc-400">
