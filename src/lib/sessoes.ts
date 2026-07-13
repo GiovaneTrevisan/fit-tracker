@@ -1,13 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import type { StatusSessao } from "@prisma/client";
 
+export interface SerieRegistradaResumo {
+  id: string;
+  numero: number;
+  carga: number;
+  reps: number;
+}
+
 export interface ExercicioDaSessao {
   treinoExercicioId: string;
+  exercicioId: string;
   nome: string;
   grupoMuscular: string;
   seriesAlvo: number;
   repsAlvoMin: number;
   repsAlvoMax: number;
+  series: SerieRegistradaResumo[];
 }
 
 export interface SessaoDetalhe {
@@ -36,6 +45,7 @@ export async function getSessao(id: string): Promise<SessaoDetalhe | null> {
           },
         },
       },
+      series: { orderBy: { numero: "asc" } },
     },
   });
 
@@ -49,11 +59,20 @@ export async function getSessao(id: string): Promise<SessaoDetalhe | null> {
     treinoNome: sessao.treino.nome,
     exercicios: sessao.treino.exercicios.map((te) => ({
       treinoExercicioId: te.id,
+      exercicioId: te.exercicioId,
       nome: te.exercicio.nome,
       grupoMuscular: te.exercicio.grupoMuscular,
       seriesAlvo: te.seriesAlvo,
       repsAlvoMin: te.repsAlvoMin,
       repsAlvoMax: te.repsAlvoMax,
+      series: sessao.series
+        .filter((s) => s.exercicioId === te.exercicioId)
+        .map((s) => ({
+          id: s.id,
+          numero: s.numero,
+          carga: Number(s.carga),
+          reps: s.reps,
+        })),
     })),
   };
 }
