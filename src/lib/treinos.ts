@@ -1,8 +1,25 @@
 import { prisma } from "@/lib/prisma";
+import { hojeEmSP } from "@/lib/historico";
+
+/**
+ * Nomes dos dias da semana indexados pela convenção do domínio (0=Domingo …
+ * 6=Sábado), a mesma do calendário. Reutilizado em selos, no select do form e
+ * nas mensagens de erro das actions.
+ */
+export const NOMES_DIAS = [
+  "Domingo",
+  "Segunda",
+  "Terça",
+  "Quarta",
+  "Quinta",
+  "Sexta",
+  "Sábado",
+] as const;
 
 export interface TreinoResumo {
   id: string;
   nome: string;
+  diaSemana: number | null;
   totalExercicios: number;
 }
 
@@ -19,6 +36,7 @@ export async function getTreinos(): Promise<TreinoResumo[]> {
   return treinos.map((t) => ({
     id: t.id,
     nome: t.nome,
+    diaSemana: t.diaSemana,
     totalExercicios: t._count.exercicios,
   }));
 }
@@ -35,6 +53,7 @@ export interface ExercicioDoTreino {
 export interface TreinoDetalhe {
   id: string;
   nome: string;
+  diaSemana: number | null;
   exercicios: ExercicioDoTreino[];
 }
 
@@ -58,6 +77,7 @@ export async function getTreino(id: string): Promise<TreinoDetalhe | null> {
   return {
     id: treino.id,
     nome: treino.nome,
+    diaSemana: treino.diaSemana,
     exercicios: treino.exercicios.map((te) => ({
       treinoExercicioId: te.id,
       nome: te.exercicio.nome,
@@ -67,4 +87,32 @@ export async function getTreino(id: string): Promise<TreinoDetalhe | null> {
       repsAlvoMax: te.repsAlvoMax,
     })),
   };
+}
+
+export interface TreinoDeHoje {
+  id: string;
+  nome: string;
+  diaSemana: number;
+}
+
+/**
+ * Treino agendado para o dia de hoje no fuso America/Sao_Paulo, ou `null` se
+ * hoje for dia de descanso (nenhum treino com esse diaSemana).
+ *
+ * O dia-da-semana é derivado da data-calendário SP (via `hojeEmSP`) construída
+ * em UTC + `getUTCDay()` — nunca `new Date().getDay()` cru, que dependeria do
+ * fuso do runtime (o deploy na Vercel roda em UTC).
+ */
+export async function getTreinoDeHoje(): Promise<TreinoDeHoje | null> {
+  const { ano, mes, dia } = hojeEmSP();
+  const diaHoje = new Date(Date.UTC(ano, mes - 1, dia)).getUTCDay();
+
+  const treino = await prisma.treino.findUnique({
+    where: { diaSemana: diaHoje },
+    select: { id: true, nome: true, diaSemana: true },
+  });
+
+  if (!treino || treino.diaSemana === null) return null;
+
+  return { id: treino.id, nome: treino.nome, diaSemana: treino.diaSemana };
 }
