@@ -35,13 +35,18 @@ Todas as estatísticas (streak, consistência, total de treinos) derivam de Sess
 ## Regras de trabalho
 - Faça mudanças mínimas; não refatore código não relacionado ao pedido
 - Rode o type check depois de cada mudança de código
-- Um commit por mudança lógica, não um commit gigante
 - Quando houver dúvida entre duas abordagens, explique as duas e me deixe escolher
 - Responda sempre em português
-- Fluxo de PR: o GitHub CLI (`gh`) não está instalado nesta máquina e não há token de
-  API. Para abrir um PR, faça o push da branch e me passe o link
-  `https://github.com/GiovaneTrevisan/fit-tracker/pull/new/<branch>` com sugestão de
-  título e descrição. Eu abro e faço o merge pela web — nunca faça merge.
+
+## Fluxo de git
+- Uma branch por feature; commits pequenos e lógicos.
+- O `gh` não está instalado e não há token de API. Para abrir PR: faça o push e me passe
+  o link `https://github.com/GiovaneTrevisan/fit-tracker/pull/new/<branch>` com sugestão
+  de título e descrição. Eu abro e mergeio pela web — nunca faça merge.
+- Depois que eu confirmar o merge, a limpeza é sempre: `git checkout main` → `git pull`
+  (traz o merge do remoto) → apagar a branch local → apagar a remota se ainda existir.
+  O `git pull` antes de tudo é obrigatório: sem ele a main local fica desatualizada e a
+  próxima branch nasce sem a feature recém-integrada.
 
 ## Comandos
 - `npm run dev`             — servidor de desenvolvimento
