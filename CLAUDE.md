@@ -26,6 +26,11 @@ Todas as estatísticas (streak, consistência, total de treinos) derivam de Sess
 - Server Components por padrão; Client Components só quando precisar de interatividade
 - Todo acesso ao banco via Prisma, nunca SQL cru
 - Arquivos em kebab-case; componentes em PascalCase
+- Módulos de acesso a dados em src/lib que importam Prisma são server-only: nunca
+  importe deles a partir de um Client Component ("use client"), senão o bundler puxa
+  o Prisma (pg) pro cliente e o build quebra. Constantes/tipos/helpers puros
+  compartilhados entre Server e Client Components devem morar em módulos separados
+  que NÃO importam Prisma (ex.: src/lib/dias-semana.ts)
 
 ## Regras de trabalho
 - Faça mudanças mínimas; não refatore código não relacionado ao pedido
