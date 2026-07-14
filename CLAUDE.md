@@ -38,6 +38,10 @@ Todas as estatísticas (streak, consistência, total de treinos) derivam de Sess
 - Um commit por mudança lógica, não um commit gigante
 - Quando houver dúvida entre duas abordagens, explique as duas e me deixe escolher
 - Responda sempre em português
+- Fluxo de PR: o GitHub CLI (`gh`) não está instalado nesta máquina e não há token de
+  API. Para abrir um PR, faça o push da branch e me passe o link
+  `https://github.com/GiovaneTrevisan/fit-tracker/pull/new/<branch>` com sugestão de
+  título e descrição. Eu abro e faço o merge pela web — nunca faça merge.
 
 ## Comandos
 - `npm run dev`             — servidor de desenvolvimento
