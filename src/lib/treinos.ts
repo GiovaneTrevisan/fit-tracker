@@ -14,6 +14,7 @@ export interface TreinoResumo {
  */
 export async function getTreinos(): Promise<TreinoResumo[]> {
   const treinos = await prisma.treino.findMany({
+    where: { arquivado: false },
     orderBy: { createdAt: "asc" },
     include: { _count: { select: { exercicios: true } } },
   });
@@ -39,6 +40,7 @@ export interface TreinoDetalhe {
   id: string;
   nome: string;
   diaSemana: number | null;
+  arquivado: boolean;
   exercicios: ExercicioDoTreino[];
 }
 
@@ -63,6 +65,7 @@ export async function getTreino(id: string): Promise<TreinoDetalhe | null> {
     id: treino.id,
     nome: treino.nome,
     diaSemana: treino.diaSemana,
+    arquivado: treino.arquivado,
     exercicios: treino.exercicios.map((te) => ({
       treinoExercicioId: te.id,
       nome: te.exercicio.nome,
@@ -92,8 +95,8 @@ export async function getTreinoDeHoje(): Promise<TreinoDeHoje | null> {
   const { ano, mes, dia } = hojeEmSP();
   const diaHoje = new Date(Date.UTC(ano, mes - 1, dia)).getUTCDay();
 
-  const treino = await prisma.treino.findUnique({
-    where: { diaSemana: diaHoje },
+  const treino = await prisma.treino.findFirst({
+    where: { diaSemana: diaHoje, arquivado: false },
     select: { id: true, nome: true, diaSemana: true },
   });
 

@@ -26,6 +26,7 @@ model Treino {
   id         String            @id @default(cuid())
   nome       String
   diaSemana  Int? // 0=Domingo … 6=Sábado; null = avulso
+  arquivado  Boolean           @default(false)
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
   exercicios TreinoExercicio[]
@@ -56,7 +57,7 @@ model Sessao {
   duracaoMin Int?
   status     StatusSessao      @default(EM_ANDAMENTO)
   createdAt  DateTime          @default(now())
-  treino     Treino            @relation(fields: [treinoId], references: [id], onDelete: Cascade)
+  treino     Treino            @relation(fields: [treinoId], references: [id], onDelete: Restrict)
   series     SerieRegistrada[]
 
   @@index([treinoId, data])
