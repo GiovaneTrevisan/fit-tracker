@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { NOMES_DIAS } from "@/lib/treinos";
+import { NOMES_DIAS } from "@/lib/dias-semana";
 import { definirDiaTreino } from "./actions";
 
 /**

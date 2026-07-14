@@ -1,4 +1,4 @@
-import { NOMES_DIAS } from "@/lib/treinos";
+import { NOMES_DIAS } from "@/lib/dias-semana";
 
 /**
  * Selo com o dia da semana do treino (ex.: "SEGUNDA"). Não renderiza nada para

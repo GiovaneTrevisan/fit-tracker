@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { NOMES_DIAS } from "@/lib/treinos";
+import { NOMES_DIAS } from "@/lib/dias-semana";
 import { criarTreino } from "./actions";
 
 export function CriarTreinoForm() {

@@ -2,6 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTreinoDeHoje } from "@/lib/treinos";
 
+// Depende do dia atual (fuso SP), que muda à meia-noite: renderiza a cada
+// request pra "Treino de Hoje" nunca ficar preso no dia do build.
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const treinoDeHoje = await getTreinoDeHoje();
 

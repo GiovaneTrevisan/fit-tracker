@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { NOMES_DIAS, parseDiaSemana } from "@/lib/treinos";
+import { NOMES_DIAS, parseDiaSemana } from "@/lib/dias-semana";
 
 export type ExercicioResult = { ok: true } | { error: string };
 
