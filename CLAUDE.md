@@ -26,13 +26,27 @@ Todas as estatísticas (streak, consistência, total de treinos) derivam de Sess
 - Server Components por padrão; Client Components só quando precisar de interatividade
 - Todo acesso ao banco via Prisma, nunca SQL cru
 - Arquivos em kebab-case; componentes em PascalCase
+- Módulos de acesso a dados em src/lib que importam Prisma são server-only: nunca
+  importe deles a partir de um Client Component ("use client"), senão o bundler puxa
+  o Prisma (pg) pro cliente e o build quebra. Constantes/tipos/helpers puros
+  compartilhados entre Server e Client Components devem morar em módulos separados
+  que NÃO importam Prisma (ex.: src/lib/dias-semana.ts)
 
 ## Regras de trabalho
 - Faça mudanças mínimas; não refatore código não relacionado ao pedido
 - Rode o type check depois de cada mudança de código
-- Um commit por mudança lógica, não um commit gigante
 - Quando houver dúvida entre duas abordagens, explique as duas e me deixe escolher
 - Responda sempre em português
+
+## Fluxo de git
+- Uma branch por feature; commits pequenos e lógicos.
+- O `gh` não está instalado e não há token de API. Para abrir PR: faça o push e me passe
+  o link `https://github.com/GiovaneTrevisan/fit-tracker/pull/new/<branch>` com sugestão
+  de título e descrição. Eu abro e mergeio pela web — nunca faça merge.
+- Depois que eu confirmar o merge, a limpeza é sempre: `git checkout main` → `git pull`
+  (traz o merge do remoto) → apagar a branch local → apagar a remota se ainda existir.
+  O `git pull` antes de tudo é obrigatório: sem ele a main local fica desatualizada e a
+  próxima branch nasce sem a feature recém-integrada.
 
 ## Comandos
 - `npm run dev`             — servidor de desenvolvimento

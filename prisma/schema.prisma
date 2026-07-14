@@ -25,10 +25,13 @@ model Exercicio {
 model Treino {
   id         String            @id @default(cuid())
   nome       String
+  diaSemana  Int? // 0=Domingo … 6=Sábado; null = avulso
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
   exercicios TreinoExercicio[]
   sessoes    Sessao[]
+
+  @@unique([diaSemana])
 }
 
 model TreinoExercicio {

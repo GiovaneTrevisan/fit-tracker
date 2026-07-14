@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { NOMES_DIAS } from "@/lib/dias-semana";
 import { criarTreino } from "./actions";
 
 export function CriarTreinoForm() {
@@ -29,6 +30,18 @@ export function CriarTreinoForm() {
           placeholder="Nome do treino"
           className="flex-1 rounded-lg border border-black/[.08] bg-transparent px-4 py-2 text-black outline-none focus:border-black/40 dark:border-white/[.145] dark:text-zinc-50 dark:focus:border-white/40"
         />
+        <select
+          name="diaSemana"
+          defaultValue=""
+          className="rounded-lg border border-black/[.08] bg-transparent px-3 py-2 text-black outline-none focus:border-black/40 dark:border-white/[.145] dark:text-zinc-50 dark:focus:border-white/40 dark:[&>option]:bg-black"
+        >
+          <option value="">Sem dia definido</option>
+          {NOMES_DIAS.map((nome, dia) => (
+            <option key={dia} value={dia}>
+              {nome}
+            </option>
+          ))}
+        </select>
         <button
           type="submit"
           disabled={isPending}

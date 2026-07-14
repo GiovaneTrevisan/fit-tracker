@@ -2,8 +2,66 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { NOMES_DIAS, parseDiaSemana } from "@/lib/dias-semana";
 
 export type ExercicioResult = { ok: true } | { error: string };
+
+/** Detecta a violação de constraint única do Postgres (dia já ocupado). */
+function isUniqueViolation(e: unknown): boolean {
+  return (
+    typeof e === "object" &&
+    e !== null &&
+    "code" in e &&
+    (e as { code?: string }).code === "P2002"
+  );
+}
+
+/**
+ * Altera ou remove o dia da semana de um treino. Valida no servidor (dia nulo ou
+ * entre 0 e 6; dia não ocupado por OUTRO treino) e revalida as telas afetadas.
+ * Selecionar "Sem dia definido" (null) transforma o treino em avulso.
+ */
+export async function definirDiaTreino(
+  formData: FormData,
+): Promise<ExercicioResult> {
+  const treinoId = String(formData.get("treinoId") ?? "");
+  if (treinoId === "") {
+    return { error: "Treino inválido" };
+  }
+
+  const dia = parseDiaSemana(formData.get("diaSemana"));
+  if (!dia.ok) {
+    return { error: "Dia inválido" };
+  }
+
+  // Pré-checagem amigável: outro treino já ocupa o dia?
+  if (dia.diaSemana !== null) {
+    const ocupado = await prisma.treino.findUnique({
+      where: { diaSemana: dia.diaSemana },
+    });
+    if (ocupado && ocupado.id !== treinoId) {
+      return { error: `${NOMES_DIAS[dia.diaSemana]} já tem um treino` };
+    }
+  }
+
+  try {
+    await prisma.treino.update({
+      where: { id: treinoId },
+      data: { diaSemana: dia.diaSemana },
+    });
+  } catch (e) {
+    if (dia.diaSemana !== null && isUniqueViolation(e)) {
+      return { error: `${NOMES_DIAS[dia.diaSemana]} já tem um treino` };
+    }
+    throw e;
+  }
+
+  revalidatePath(`/treinos/${treinoId}`);
+  revalidatePath("/treinos");
+  revalidatePath("/");
+
+  return { ok: true };
+}
 
 /**
  * Adiciona um exercício ao treino. Valida no servidor, reutiliza o Exercicio do
