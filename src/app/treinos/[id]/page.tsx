@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getTreino } from "@/lib/treinos";
 import { iniciarSessao } from "@/app/sessoes/actions";
 import { AdicionarExercicioForm } from "./adicionar-exercicio-form";
+import { EditarDiaForm } from "./editar-dia-form";
+import { SeloDia } from "../selo-dia";
 import { removerExercicio } from "./actions";
 
 export default async function TreinoDetalhePage({
@@ -34,9 +36,14 @@ export default async function TreinoDetalhePage({
         ← Treinos
       </Link>
 
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
-        {treino.nome}
-      </h1>
+      <div className="mt-2 flex items-center gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
+          {treino.nome}
+        </h1>
+        <SeloDia diaSemana={treino.diaSemana} />
+      </div>
+
+      <EditarDiaForm treinoId={treino.id} diaSemana={treino.diaSemana} />
 
       <form action={iniciarAction} className="mt-4">
         <input type="hidden" name="treinoId" value={treino.id} />
