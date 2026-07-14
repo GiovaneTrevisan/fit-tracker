@@ -1,10 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getTreinoDeHoje } from "@/lib/treinos";
 
-export default function Home() {
+export default async function Home() {
+  const treinoDeHoje = await getTreinoDeHoje();
+
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+        <section className="w-full self-stretch rounded-xl border border-black/[.08] p-6 dark:border-white/[.145]">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Treino de Hoje
+          </h2>
+          {treinoDeHoje ? (
+            <Link
+              href={`/treinos/${treinoDeHoje.id}`}
+              className="mt-1 inline-block text-2xl font-semibold tracking-tight text-black hover:underline dark:text-zinc-50"
+            >
+              {treinoDeHoje.nome}
+            </Link>
+          ) : (
+            <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-500 dark:text-zinc-400">
+              Descanso hoje
+            </p>
+          )}
+        </section>
         <Image
           className="dark:invert"
           src="/next.svg"
