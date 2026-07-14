@@ -40,6 +40,9 @@ Todas as estatísticas (streak, consistência, total de treinos) derivam de Sess
 
 ## Fluxo de git
 - Uma branch por feature; commits pequenos e lógicos.
+- Nunca faça push nem abra PR por conta própria. Ao terminar de implementar e rodar o
+  type check, pare e me avise: eu valido no navegador primeiro. Só faça o push e me passe
+  o link do PR quando eu pedir explicitamente ("abra o PR").
 - O `gh` não está instalado e não há token de API. Para abrir PR: faça o push e me passe
   o link `https://github.com/GiovaneTrevisan/fit-tracker/pull/new/<branch>` com sugestão
   de título e descrição. Eu abro e mergeio pela web — nunca faça merge.
