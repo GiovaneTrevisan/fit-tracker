@@ -161,3 +161,41 @@ export async function removerExercicio(
   revalidatePath(`/treinos/${treinoId}`);
   return { ok: true };
 }
+
+export type DeletarTreinoResult =
+  | { ok: "excluido" }
+  | { ok: "arquivado" }
+  | { error: string };
+
+/**
+ * Deleta ou arquiva um treino (regra híbrida pra preservar histórico):
+ * - Sem sessões: deleta de verdade (o Cascade em TreinoExercicio limpa os
+ *   vínculos; o catálogo de Exercicio permanece).
+ * - Com sessões: arquiva (arquivado = true) e libera o dia da semana
+ *   (diaSemana = null, senão o @@unique prenderia o slot). As sessões seguem
+ *   visíveis no histórico e na "última vez".
+ */
+export async function deletarTreino(
+  treinoId: string,
+): Promise<DeletarTreinoResult> {
+  if (treinoId === "") {
+    return { error: "Treino inválido" };
+  }
+
+  const totalSessoes = await prisma.sessao.count({ where: { treinoId } });
+
+  if (totalSessoes === 0) {
+    await prisma.treino.delete({ where: { id: treinoId } });
+  } else {
+    await prisma.treino.update({
+      where: { id: treinoId },
+      data: { arquivado: true, diaSemana: null },
+    });
+  }
+
+  revalidatePath("/treinos");
+  revalidatePath("/");
+  revalidatePath(`/treinos/${treinoId}`);
+
+  return { ok: totalSessoes === 0 ? "excluido" : "arquivado" };
+}

@@ -4,6 +4,7 @@ import { getTreino } from "@/lib/treinos";
 import { iniciarSessao } from "@/app/sessoes/actions";
 import { AdicionarExercicioForm } from "./adicionar-exercicio-form";
 import { EditarDiaForm } from "./editar-dia-form";
+import { DeletarTreinoForm } from "./deletar-treino-form";
 import { SeloDia } from "../selo-dia";
 import { removerExercicio } from "./actions";
 
@@ -16,6 +17,8 @@ export default async function TreinoDetalhePage({
   const treino = await getTreino(id);
 
   if (!treino) notFound();
+
+  const arquivado = treino.arquivado;
 
   async function removerAction(formData: FormData) {
     "use server";
@@ -41,19 +44,28 @@ export default async function TreinoDetalhePage({
           {treino.nome}
         </h1>
         <SeloDia diaSemana={treino.diaSemana} />
+        {arquivado && (
+          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+            Arquivado
+          </span>
+        )}
       </div>
 
-      <EditarDiaForm treinoId={treino.id} diaSemana={treino.diaSemana} />
+      {!arquivado && (
+        <>
+          <EditarDiaForm treinoId={treino.id} diaSemana={treino.diaSemana} />
 
-      <form action={iniciarAction} className="mt-4">
-        <input type="hidden" name="treinoId" value={treino.id} />
-        <button
-          type="submit"
-          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
-        >
-          Iniciar treino
-        </button>
-      </form>
+          <form action={iniciarAction} className="mt-4">
+            <input type="hidden" name="treinoId" value={treino.id} />
+            <button
+              type="submit"
+              className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+            >
+              Iniciar treino
+            </button>
+          </form>
+        </>
+      )}
 
       {treino.exercicios.length === 0 ? (
         <p className="mt-6 text-zinc-600 dark:text-zinc-400">
@@ -79,27 +91,34 @@ export default async function TreinoDetalhePage({
                   {ex.grupoMuscular} · {ex.seriesAlvo} séries · {reps} reps
                 </p>
               </div>
-              <form action={removerAction}>
-                <input
-                  type="hidden"
-                  name="treinoExercicioId"
-                  value={ex.treinoExercicioId}
-                />
-                <input type="hidden" name="treinoId" value={treino.id} />
-                <button
-                  type="submit"
-                  className="text-sm text-red-600 hover:underline dark:text-red-400"
-                >
-                  Remover
-                </button>
-              </form>
+              {!arquivado && (
+                <form action={removerAction}>
+                  <input
+                    type="hidden"
+                    name="treinoExercicioId"
+                    value={ex.treinoExercicioId}
+                  />
+                  <input type="hidden" name="treinoId" value={treino.id} />
+                  <button
+                    type="submit"
+                    className="text-sm text-red-600 hover:underline dark:text-red-400"
+                  >
+                    Remover
+                  </button>
+                </form>
+              )}
             </li>
             );
           })}
         </ul>
       )}
 
-      <AdicionarExercicioForm treinoId={treino.id} />
+      {!arquivado && (
+        <>
+          <AdicionarExercicioForm treinoId={treino.id} />
+          <DeletarTreinoForm treinoId={treino.id} />
+        </>
+      )}
     </main>
   );
 }
