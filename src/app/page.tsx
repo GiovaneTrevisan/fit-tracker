@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { chaveDia, hojeEmSP } from "@/lib/data-sp";
+import { NOMES_DIAS } from "@/lib/dias-semana";
 import { getHeatmapAno, getStreak, getTotalTreinos } from "@/lib/estatisticas";
 import { getTreinoDeHoje } from "@/lib/treinos";
 
@@ -9,7 +10,16 @@ export const dynamic = "force-dynamic";
 
 const DIA_MS = 86_400_000;
 
+const MESES = [
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+];
+
+/** Linhas rotuladas no eixo Y: só Seg/Qua/Sex, como o GitHub, pra não poluir. */
+const DIAS_ROTULADOS = [1, 3, 5];
+
 const celulaBase = "h-3 w-3 rounded-sm";
+const rotulo = "text-[10px] leading-3 text-zinc-500 dark:text-zinc-400";
 const tons = [
   "bg-black/[.06] dark:bg-white/[.10]",
   "bg-green-100 dark:bg-green-900/30",
@@ -40,6 +50,21 @@ function celulasDoAno(ano: number): (Date | null)[] {
   return celulas;
 }
 
+/**
+ * Rótulo de mês por coluna (semana): o nome aparece na coluna que contém o dia
+ * 1º daquele mês; nas demais, null. Uma coluna = 7 células consecutivas, mesma
+ * ordem em que a grade (grid-flow-col, 7 linhas) as consome.
+ */
+function rotulosDeMes(celulas: (Date | null)[]): (string | null)[] {
+  const semanas = Math.ceil(celulas.length / 7);
+  return Array.from({ length: semanas }, (_, w) => {
+    const primeiroDoMes = celulas
+      .slice(w * 7, w * 7 + 7)
+      .find((d) => d !== null && d.getUTCDate() === 1);
+    return primeiroDoMes ? MESES[primeiroDoMes.getUTCMonth()] : null;
+  });
+}
+
 export default async function Home() {
   const { ano } = hojeEmSP();
   const [treinoDeHoje, total, streak, heatmap] = await Promise.all([
@@ -48,6 +73,7 @@ export default async function Home() {
     getStreak(),
     getHeatmapAno(ano),
   ]);
+  const celulas = celulasDoAno(ano);
 
   return (
     <div className="flex flex-1 flex-col items-center bg-zinc-50 font-sans dark:bg-black">
@@ -98,27 +124,57 @@ export default async function Home() {
             <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
               Consistência em {ano}
             </p>
+            {/* Rótulos e grade moram no mesmo bloco que rola: no overflow-x
+                eles deslizam junto e nunca descolam das colunas. */}
             <div className="mt-2 overflow-x-auto">
-              <div className="grid grid-flow-col grid-rows-7 gap-1">
-                {celulasDoAno(ano).map((d, i) => {
-                  if (!d) return <div key={i} className={celulaBase} />;
-                  const partes = {
-                    ano: d.getUTCFullYear(),
-                    mes: d.getUTCMonth() + 1,
-                    dia: d.getUTCDate(),
-                  };
-                  const chave = chaveDia(partes);
-                  const qtd = heatmap.get(chave) ?? 0;
-                  return (
-                    <div
-                      key={i}
-                      className={`${celulaBase} ${tomPara(qtd)}`}
-                      title={`${partes.dia}/${partes.mes}/${partes.ano} — ${qtd} ${
-                        qtd === 1 ? "treino" : "treinos"
-                      }`}
-                    />
-                  );
-                })}
+              <div className="inline-block">
+                <div className="flex gap-1">
+                  <div className="w-7 shrink-0" />
+                  {rotulosDeMes(celulas).map((mes, w) => (
+                    <div key={w} className="relative h-4 w-3 shrink-0">
+                      {mes && (
+                        <span className={`absolute left-0 top-0 ${rotulo}`}>
+                          {mes}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-1">
+                  <div className="grid w-7 shrink-0 grid-rows-7 gap-1">
+                    {NOMES_DIAS.map((nome, i) => (
+                      <div
+                        key={i}
+                        className={`flex h-3 items-center justify-end ${rotulo}`}
+                      >
+                        {DIAS_ROTULADOS.includes(i) ? nome.slice(0, 3) : ""}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-flow-col grid-rows-7 gap-1">
+                    {celulas.map((d, i) => {
+                      if (!d) return <div key={i} className={celulaBase} />;
+                      const partes = {
+                        ano: d.getUTCFullYear(),
+                        mes: d.getUTCMonth() + 1,
+                        dia: d.getUTCDate(),
+                      };
+                      const chave = chaveDia(partes);
+                      const qtd = heatmap.get(chave) ?? 0;
+                      return (
+                        <div
+                          key={i}
+                          className={`${celulaBase} ${tomPara(qtd)}`}
+                          title={`${partes.dia}/${partes.mes}/${partes.ano} — ${qtd} ${
+                            qtd === 1 ? "treino" : "treinos"
+                          }`}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
