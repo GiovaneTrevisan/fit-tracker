@@ -1,18 +1,58 @@
-import Image from "next/image";
 import Link from "next/link";
+import { chaveDia, hojeEmSP } from "@/lib/data-sp";
+import { getHeatmapAno, getStreak, getTotalTreinos } from "@/lib/estatisticas";
 import { getTreinoDeHoje } from "@/lib/treinos";
 
 // Depende do dia atual (fuso SP), que muda à meia-noite: renderiza a cada
 // request pra "Treino de Hoje" nunca ficar preso no dia do build.
 export const dynamic = "force-dynamic";
 
+const DIA_MS = 86_400_000;
+
+const celulaBase = "h-3 w-3 rounded-sm";
+const tons = [
+  "bg-black/[.06] dark:bg-white/[.10]",
+  "bg-green-100 dark:bg-green-900/30",
+  "bg-green-300 dark:bg-green-700/60",
+  "bg-green-500 dark:bg-green-500",
+];
+
+function tomPara(qtd: number): string {
+  return tons[Math.min(qtd, tons.length - 1)];
+}
+
+/**
+ * Células do ano em ordem de grade: do domingo <= 1º de janeiro até o sábado >=
+ * 31 de dezembro, pra as colunas fecharem semanas inteiras. Dias fora do ano
+ * viram null (célula invisível que só segura o alinhamento).
+ */
+function celulasDoAno(ano: number): (Date | null)[] {
+  const primeiro = Date.UTC(ano, 0, 1);
+  const ultimo = Date.UTC(ano, 11, 31);
+  const inicio = primeiro - new Date(primeiro).getUTCDay() * DIA_MS;
+  const fim = ultimo + (6 - new Date(ultimo).getUTCDay()) * DIA_MS;
+
+  const celulas: (Date | null)[] = [];
+  for (let t = inicio; t <= fim; t += DIA_MS) {
+    const d = new Date(t);
+    celulas.push(d.getUTCFullYear() === ano ? d : null);
+  }
+  return celulas;
+}
+
 export default async function Home() {
-  const treinoDeHoje = await getTreinoDeHoje();
+  const { ano } = hojeEmSP();
+  const [treinoDeHoje, total, streak, heatmap] = await Promise.all([
+    getTreinoDeHoje(),
+    getTotalTreinos(),
+    getStreak(),
+    getHeatmapAno(ano),
+  ]);
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <section className="w-full self-stretch rounded-xl border border-black/[.08] p-6 dark:border-white/[.145]">
+    <div className="flex flex-1 flex-col items-center bg-zinc-50 font-sans dark:bg-black">
+      <main className="flex w-full max-w-3xl flex-1 flex-col gap-6 bg-white px-6 py-12 dark:bg-black">
+        <section className="w-full rounded-xl border border-black/[.08] p-6 dark:border-white/[.145]">
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
             Treino de Hoje
           </h2>
@@ -29,61 +69,60 @@ export default async function Home() {
             </p>
           )}
         </section>
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+
+        <section className="w-full rounded-xl border border-black/[.08] p-6 dark:border-white/[.145]">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Estatísticas
+          </h2>
+
+          <div className="mt-4 flex gap-8">
+            <div>
+              <p className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
+                {total}
+              </p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {total === 1 ? "treino feito" : "treinos feitos"}
+              </p>
+            </div>
+            <div>
+              <p className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
+                {streak}
+              </p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {streak === 1 ? "treino em sequência" : "treinos em sequência"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              Consistência em {ano}
+            </p>
+            <div className="mt-2 overflow-x-auto">
+              <div className="grid grid-flow-col grid-rows-7 gap-1">
+                {celulasDoAno(ano).map((d, i) => {
+                  if (!d) return <div key={i} className={celulaBase} />;
+                  const partes = {
+                    ano: d.getUTCFullYear(),
+                    mes: d.getUTCMonth() + 1,
+                    dia: d.getUTCDate(),
+                  };
+                  const chave = chaveDia(partes);
+                  const qtd = heatmap.get(chave) ?? 0;
+                  return (
+                    <div
+                      key={i}
+                      className={`${celulaBase} ${tomPara(qtd)}`}
+                      title={`${partes.dia}/${partes.mes}/${partes.ano} — ${qtd} ${
+                        qtd === 1 ? "treino" : "treinos"
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
