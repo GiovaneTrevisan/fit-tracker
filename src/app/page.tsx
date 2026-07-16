@@ -31,6 +31,37 @@ function tomPara(qtd: number): string {
   return tons[Math.min(qtd, tons.length - 1)];
 }
 
+const tooltipBase =
+  "pointer-events-none absolute bottom-full z-10 mb-1 hidden whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[11px] leading-4 font-medium text-zinc-50 shadow-sm group-hover:block dark:bg-zinc-100 dark:text-zinc-900";
+
+/**
+ * Colunas de cada ponta onde o tooltip ancora pela lateral em vez de centralizar:
+ * centralizado, ele precisaria de ~100px pra cada lado da célula e vazaria pra
+ * fora da área que rola (onde seria cortado, não empurrado).
+ */
+const COLUNAS_DE_BORDA = 7;
+
+function ancoragem(coluna: number, semanas: number): string {
+  if (coluna < COLUNAS_DE_BORDA) return "left-0";
+  if (coluna >= semanas - COLUNAS_DE_BORDA) return "right-0";
+  return "left-1/2 -translate-x-1/2";
+}
+
+// As células são âncoras de meia-noite UTC representando o dia-calendário SP:
+// formatar em UTC lê a data como ela é, sem o fuso do runtime deslocar o dia.
+const dataLonga = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "UTC",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+function textoTooltip(d: Date, qtd: number): string {
+  const contagem =
+    qtd === 0 ? "sem treino" : qtd === 1 ? "1 treino" : `${qtd} treinos`;
+  return `${dataLonga.format(d)} — ${contagem}`;
+}
+
 /**
  * Células do ano em ordem de grade: do domingo <= 1º de janeiro até o sábado >=
  * 31 de dezembro, pra as colunas fecharem semanas inteiras. Dias fora do ano
@@ -125,8 +156,12 @@ export default async function Home() {
               Consistência em {ano}
             </p>
             {/* Rótulos e grade moram no mesmo bloco que rola: no overflow-x
-                eles deslizam junto e nunca descolam das colunas. */}
-            <div className="mt-2 overflow-x-auto">
+                eles deslizam junto e nunca descolam das colunas.
+                O pt-5 não é estético: overflow-x-auto faz o overflow-y virar
+                auto, e o corte acontece na padding box — sem essa folga o
+                tooltip da primeira linha seria cortado no topo. Como ele cabe
+                dentro do padding, também não sobra nada pra rolar na vertical. */}
+            <div className="mt-2 overflow-x-auto pt-5 pb-1">
               <div className="inline-block">
                 <div className="flex gap-1">
                   <div className="w-7 shrink-0" />
@@ -166,11 +201,17 @@ export default async function Home() {
                       return (
                         <div
                           key={i}
-                          className={`${celulaBase} ${tomPara(qtd)}`}
-                          title={`${partes.dia}/${partes.mes}/${partes.ano} — ${qtd} ${
-                            qtd === 1 ? "treino" : "treinos"
-                          }`}
-                        />
+                          className={`group relative ${celulaBase} ${tomPara(qtd)}`}
+                        >
+                          <span
+                            className={`${tooltipBase} ${ancoragem(
+                              Math.floor(i / 7),
+                              celulas.length / 7,
+                            )}`}
+                          >
+                            {textoTooltip(d, qtd)}
+                          </span>
+                        </div>
                       );
                     })}
                   </div>
