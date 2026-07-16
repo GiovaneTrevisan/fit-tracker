@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getSessoesDoMes, hojeEmSP } from "@/lib/historico";
+import { hojeEmSP } from "@/lib/data-sp";
+import { getSessoesDoMes } from "@/lib/historico";
 
 const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
