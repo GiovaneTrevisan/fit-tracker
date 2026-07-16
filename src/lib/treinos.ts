@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { hojeEmSP } from "@/lib/historico";
+import { hojeEmSP } from "@/lib/data-sp";
 
 export interface TreinoResumo {
   id: string;
