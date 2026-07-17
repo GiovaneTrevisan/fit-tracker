@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
+
   --background: #ffffff;
   --foreground: #171717;
 
@@ -62,13 +64,6 @@
   --radius-card: 0.75rem; /* 12 — cards de treino/exercício */
   --radius-bloco: 1.25rem; /* 20 — containers grandes (hero, streak, etc.) */
   /* pílulas (selo, botão, FAB) usam rounded-full */
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {

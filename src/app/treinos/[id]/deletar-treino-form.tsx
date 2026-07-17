@@ -42,15 +42,15 @@ export function DeletarTreinoForm({ treinoId }: { treinoId: string }) {
         <button
           type="button"
           onClick={() => setConfirmando(true)}
-          className="text-sm text-red-600 hover:underline dark:text-red-400"
+          className="text-sm text-red-600 hover:underline"
         >
           Excluir treino
         </button>
         {aviso && (
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{aviso}</p>
+          <p className="mt-2 text-sm text-zinc-600">{aviso}</p>
         )}
         {erro && (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{erro}</p>
+          <p className="mt-2 text-sm text-red-600">{erro}</p>
         )}
       </div>
     );
@@ -58,7 +58,7 @@ export function DeletarTreinoForm({ treinoId }: { treinoId: string }) {
 
   return (
     <div className="mt-8 flex flex-col gap-2">
-      <p className="text-sm text-zinc-700 dark:text-zinc-300">
+      <p className="text-sm text-zinc-700">
         Tem certeza? Treinos com sessões registradas são arquivados; sem sessões,
         são excluídos de vez.
       </p>
@@ -75,12 +75,12 @@ export function DeletarTreinoForm({ treinoId }: { treinoId: string }) {
           type="button"
           onClick={() => setConfirmando(false)}
           disabled={isPending}
-          className="rounded-lg border border-black/[.08] px-4 py-2 font-medium transition-colors hover:bg-black/[.04] disabled:opacity-50 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+          className="rounded-lg border border-black/[.08] px-4 py-2 font-medium transition-colors hover:bg-black/[.04] disabled:opacity-50"
         >
           Cancelar
         </button>
       </div>
-      {erro && <p className="text-sm text-red-600 dark:text-red-400">{erro}</p>}
+      {erro && <p className="text-sm text-red-600">{erro}</p>}
     </div>
   );
 }

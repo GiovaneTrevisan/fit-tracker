@@ -27,7 +27,7 @@ export function AnotarSerieForm({
   }
 
   const inputClass =
-    "rounded-lg border border-black/[.08] bg-transparent px-4 py-2 text-black outline-none focus:border-black/40 dark:border-white/[.145] dark:text-zinc-50 dark:focus:border-white/40";
+    "rounded-lg border border-black/[.08] bg-transparent px-4 py-2 text-black outline-none focus:border-black/40";
 
   return (
     <form ref={formRef} action={handleSubmit} className="mt-3 flex flex-col gap-2">
@@ -52,12 +52,12 @@ export function AnotarSerieForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50"
         >
           {isPending ? "Anotando..." : "Anotar série"}
         </button>
       </div>
-      {erro && <p className="text-sm text-red-600 dark:text-red-400">{erro}</p>}
+      {erro && <p className="text-sm text-red-600">{erro}</p>}
     </form>
   );
 }

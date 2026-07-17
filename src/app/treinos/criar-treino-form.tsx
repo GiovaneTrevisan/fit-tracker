@@ -28,12 +28,12 @@ export function CriarTreinoForm() {
           type="text"
           name="nome"
           placeholder="Nome do treino"
-          className="flex-1 rounded-lg border border-black/[.08] bg-transparent px-4 py-2 text-black outline-none focus:border-black/40 dark:border-white/[.145] dark:text-zinc-50 dark:focus:border-white/40"
+          className="flex-1 rounded-lg border border-black/[.08] bg-transparent px-4 py-2 text-black outline-none focus:border-black/40"
         />
         <select
           name="diaSemana"
           defaultValue=""
-          className="rounded-lg border border-black/[.08] bg-transparent px-3 py-2 text-black outline-none focus:border-black/40 dark:border-white/[.145] dark:text-zinc-50 dark:focus:border-white/40 dark:[&>option]:bg-black"
+          className="rounded-lg border border-black/[.08] bg-transparent px-3 py-2 text-black outline-none focus:border-black/40"
         >
           <option value="">Sem dia definido</option>
           {NOMES_DIAS.map((nome, dia) => (
@@ -45,12 +45,12 @@ export function CriarTreinoForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50"
         >
           {isPending ? "Criando..." : "Criar treino"}
         </button>
       </div>
-      {erro && <p className="text-sm text-red-600 dark:text-red-400">{erro}</p>}
+      {erro && <p className="text-sm text-red-600">{erro}</p>}
     </form>
   );
 }

@@ -19,12 +19,12 @@ const MESES = [
 const DIAS_ROTULADOS = [1, 3, 5];
 
 const celulaBase = "h-3 w-3 rounded-sm";
-const rotulo = "text-[10px] leading-3 text-zinc-500 dark:text-zinc-400";
+const rotulo = "text-[10px] leading-3 text-zinc-500";
 const tons = [
-  "bg-black/[.06] dark:bg-white/[.10]",
-  "bg-green-100 dark:bg-green-900/30",
-  "bg-green-300 dark:bg-green-700/60",
-  "bg-green-500 dark:bg-green-500",
+  "bg-black/[.06]",
+  "bg-green-100",
+  "bg-green-300",
+  "bg-green-500",
 ];
 
 function tomPara(qtd: number): string {
@@ -32,7 +32,7 @@ function tomPara(qtd: number): string {
 }
 
 const tooltipBase =
-  "pointer-events-none absolute bottom-full z-10 mb-1 hidden whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[11px] leading-4 font-medium text-zinc-50 shadow-sm group-hover:block dark:bg-zinc-100 dark:text-zinc-900";
+  "pointer-events-none absolute bottom-full z-10 mb-1 hidden whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[11px] leading-4 font-medium text-zinc-50 shadow-sm group-hover:block";
 
 /**
  * Colunas de cada ponta onde o tooltip ancora pela lateral em vez de centralizar:
@@ -107,52 +107,52 @@ export default async function Home() {
   const celulas = celulasDoAno(ano);
 
   return (
-    <div className="flex flex-1 flex-col items-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-3xl flex-1 flex-col gap-6 bg-white px-6 py-12 dark:bg-black">
-        <section className="w-full rounded-xl border border-black/[.08] p-6 dark:border-white/[.145]">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+    <div className="flex flex-1 flex-col items-center bg-zinc-50 font-sans">
+      <main className="flex w-full max-w-3xl flex-1 flex-col gap-6 bg-white px-6 py-12">
+        <section className="w-full rounded-xl border border-black/[.08] p-6">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
             Treino de Hoje
           </h2>
           {treinoDeHoje ? (
             <Link
               href={`/treinos/${treinoDeHoje.id}`}
-              className="mt-1 inline-block text-2xl font-semibold tracking-tight text-black hover:underline dark:text-zinc-50"
+              className="mt-1 inline-block text-2xl font-semibold tracking-tight text-black hover:underline"
             >
               {treinoDeHoje.nome}
             </Link>
           ) : (
-            <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-500">
               Descanso hoje
             </p>
           )}
         </section>
 
-        <section className="w-full rounded-xl border border-black/[.08] p-6 dark:border-white/[.145]">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <section className="w-full rounded-xl border border-black/[.08] p-6">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
             Estatísticas
           </h2>
 
           <div className="mt-4 flex gap-8">
             <div>
-              <p className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
+              <p className="text-2xl font-semibold tracking-tight text-black">
                 {total}
               </p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm text-zinc-600">
                 {total === 1 ? "treino feito" : "treinos feitos"}
               </p>
             </div>
             <div>
-              <p className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
+              <p className="text-2xl font-semibold tracking-tight text-black">
                 {streak}
               </p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm text-zinc-600">
                 {streak === 1 ? "treino em sequência" : "treinos em sequência"}
               </p>
             </div>
           </div>
 
           <div className="mt-6">
-            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs font-medium text-zinc-500">
               Consistência em {ano}
             </p>
             {/* Rótulos e grade moram no mesmo bloco que rola: no overflow-x
