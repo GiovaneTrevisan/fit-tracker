@@ -22,6 +22,20 @@ Regra da "última vez": pra um exercício, buscar a Sessao mais recente anterior
 inclua e mostrar as SerieRegistrada dela como referência.
 Todas as estatísticas (streak, consistência, total de treinos) derivam de Sessao.
 
+## Design (Figma)
+O arquivo "FIT.AI - Alunos - Copy" é referência de LINGUAGEM VISUAL apenas: cores,
+tipografia, espaçamento, estilo de componentes. Não é o escopo do app.
+
+Ele contém telas de funcionalidades que este app NÃO tem (chat de IA, etc.). Nunca
+implemente uma tela ou feature só porque ela existe no Figma — a existência de um
+design não é um pedido. Se algo do Figma parecer útil, me pergunte antes.
+
+As telas do app são estas, e só estas:
+- Início — `/`
+- Treinos — `/treinos` e `/treinos/[id]`
+- Sessão — `/sessoes/[id]`
+- Histórico — `/historico`
+
 ## Convenções
 - Server Components por padrão; Client Components só quando precisar de interatividade
 - Todo acesso ao banco via Prisma, nunca SQL cru
