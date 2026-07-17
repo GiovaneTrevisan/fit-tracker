@@ -36,6 +36,18 @@ As telas do app são estas, e só estas:
 - Sessão — `/sessoes/[id]`
 - Histórico — `/historico`
 
+## Design (tokens e primitivas)
+- Os design tokens ficam em src/app/globals.css (paleta crua → semânticos → @theme inline).
+  Sempre use os tokens semânticos (bg-primaria, rounded-card...), nunca hex solto nem
+  classe de cor do Tailwind (bg-blue-600) nos componentes.
+- Valores medidos do Figma, não estimados. Se precisar de um token novo, meça no design —
+  não invente.
+- Tipografia: Inter Tight, só nos pesos 400 e 600. Nunca font-bold (700): o design não usa.
+  Sem tracking negativo — o aperto vem da própria família.
+- O design é light-only. Não invente valores de tema escuro.
+- Primitivas em src/components/ (Card, Badge, Button, Rotulo/Valor) são Server Components
+  presentacionais. Prefira reusá-las a criar estilo novo na tela.
+
 ## Convenções
 - Server Components por padrão; Client Components só quando precisar de interatividade
 - Todo acesso ao banco via Prisma, nunca SQL cru
