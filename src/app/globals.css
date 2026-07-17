@@ -3,13 +3,65 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* paleta crua (Figma) */
+  --azul: #2b54ff;
+  --preto: #000000;
+  --branco: #ffffff;
+  --creme: #fef3eb;
+  --laranja: #f06100;
+  --consist-1: #d5dffe;
+  --consist-2: #95a9ff;
+  --consist-3: #4569ff;
+  --consist-4: #2b54ff;
+
+  /* semânticos (tema claro — o design não tem dark) */
+  --cor-primaria: var(--azul); /* botões, nav ativa, acentos, links */
+  --cor-primaria-texto: var(--branco); /* texto sobre a primária */
+  --cor-superficie: var(--branco); /* fundo do app / cards claros */
+  --cor-forte: var(--preto); /* hero, cards de treino, texto forte */
+  --cor-creme: var(--creme); /* card da sequência/streak */
+  --cor-chama: var(--laranja); /* ícone de chama */
+  --cor-texto: #171717; /* corpo */
+  --cor-texto-suave: #6b7280; /* labels/legendas em cinza */
+  --consistencia-1: var(--consist-1);
+  --consistencia-2: var(--consist-2);
+  --consistencia-3: var(--consist-3);
+  --consistencia-4: var(--consist-4);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter-tight);
+
+  --color-primaria: var(--cor-primaria);
+  --color-primaria-texto: var(--cor-primaria-texto);
+  --color-superficie: var(--cor-superficie);
+  --color-forte: var(--cor-forte);
+  --color-creme: var(--cor-creme);
+  --color-chama: var(--cor-chama);
+  --color-texto: var(--cor-texto);
+  --color-texto-suave: var(--cor-texto-suave);
+  --color-consistencia-1: var(--consistencia-1);
+  --color-consistencia-2: var(--consistencia-2);
+  --color-consistencia-3: var(--consistencia-3);
+  --color-consistencia-4: var(--consistencia-4);
+
+  /* Tipografia — gera text-hero, text-titulo, … (sem tracking: a família já é estreita) */
+  --text-hero: 3rem; /* 48 — Olá/Superiores */
+  --text-titulo: 2rem; /* 32 */
+  --text-secao: 1.5rem; /* 24 — headings de seção */
+  --text-grande: 1.125rem; /* 18 */
+  --text-corpo: 1rem; /* 16 — base */
+  --text-rotulo: 0.875rem; /* 14 */
+  --text-micro: 0.75rem; /* 12 — micro-labels em MAIÚSCULA */
+
+  /* Raios — valores medidos no Figma (o design é pouco arredondado) */
+  --radius-chip: 0.375rem; /* 6  — chips e quadradinhos de consistência (20x20) */
+  --radius-card: 0.75rem; /* 12 — cards de treino/exercício */
+  --radius-bloco: 1.25rem; /* 20 — containers grandes (hero, streak, etc.) */
+  /* pílulas (selo, botão, FAB) usam rounded-full */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +74,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
