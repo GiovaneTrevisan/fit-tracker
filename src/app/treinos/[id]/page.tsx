@@ -34,18 +34,18 @@ export default async function TreinoDetalhePage({
     <main className="mx-auto w-full max-w-3xl px-6 py-12">
       <Link
         href="/treinos"
-        className="text-sm text-zinc-600 hover:underline dark:text-zinc-400"
+        className="text-sm text-zinc-600 hover:underline"
       >
         ← Treinos
       </Link>
 
       <div className="mt-2 flex items-center gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
+        <h1 className="text-2xl font-semibold tracking-tight text-black">
           {treino.nome}
         </h1>
         <SeloDia diaSemana={treino.diaSemana} />
         {arquivado && (
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
             Arquivado
           </span>
         )}
@@ -59,7 +59,7 @@ export default async function TreinoDetalhePage({
             <input type="hidden" name="treinoId" value={treino.id} />
             <button
               type="submit"
-              className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+              className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50"
             >
               Iniciar treino
             </button>
@@ -68,7 +68,7 @@ export default async function TreinoDetalhePage({
       )}
 
       {treino.exercicios.length === 0 ? (
-        <p className="mt-6 text-zinc-600 dark:text-zinc-400">
+        <p className="mt-6 text-zinc-600">
           Nenhum exercício ainda
         </p>
       ) : (
@@ -81,13 +81,13 @@ export default async function TreinoDetalhePage({
             return (
             <li
               key={ex.treinoExercicioId}
-              className="flex items-center justify-between gap-4 rounded-lg border border-black/[.08] px-4 py-3 dark:border-white/[.145]"
+              className="flex items-center justify-between gap-4 rounded-lg border border-black/[.08] px-4 py-3"
             >
               <div>
-                <p className="font-medium text-black dark:text-zinc-50">
+                <p className="font-medium text-black">
                   {ex.nome}
                 </p>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm text-zinc-600">
                   {ex.grupoMuscular} · {ex.seriesAlvo} séries · {reps} reps
                 </p>
               </div>
@@ -101,7 +101,7 @@ export default async function TreinoDetalhePage({
                   <input type="hidden" name="treinoId" value={treino.id} />
                   <button
                     type="submit"
-                    className="text-sm text-red-600 hover:underline dark:text-red-400"
+                    className="text-sm text-red-600 hover:underline"
                   >
                     Remover
                   </button>

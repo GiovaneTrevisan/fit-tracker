@@ -51,15 +51,14 @@ export default async function HistoricoPage({
   const ehMesAtual = ano === hoje.ano && mes === hoje.mes;
 
   const cellBase = "min-h-[5rem] rounded-lg border p-2 text-sm";
-  const cellNeutro = "border-black/[.08] dark:border-white/[.145]";
-  const cellMarcado =
-    "border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-900/20";
+  const cellNeutro = "border-black/[.08]";
+  const cellMarcado = "border-green-300 bg-green-50";
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-12">
       <Link
         href="/"
-        className="text-sm text-zinc-600 hover:underline dark:text-zinc-400"
+        className="text-sm text-zinc-600 hover:underline"
       >
         ← Início
       </Link>
@@ -67,16 +66,16 @@ export default async function HistoricoPage({
       <div className="mt-2 flex items-center justify-between gap-4">
         <Link
           href={`/historico?mes=${mesAnterior}`}
-          className="rounded-lg border border-black/[.08] px-3 py-1.5 text-sm transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+          className="rounded-lg border border-black/[.08] px-3 py-1.5 text-sm transition-colors hover:bg-black/[.04]"
         >
           ◀ Anterior
         </Link>
-        <h1 className="text-xl font-semibold tracking-tight text-black dark:text-zinc-50">
+        <h1 className="text-xl font-semibold tracking-tight text-black">
           {tituloCap}
         </h1>
         <Link
           href={`/historico?mes=${mesProximo}`}
-          className="rounded-lg border border-black/[.08] px-3 py-1.5 text-sm transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+          className="rounded-lg border border-black/[.08] px-3 py-1.5 text-sm transition-colors hover:bg-black/[.04]"
         >
           Próximo ▶
         </Link>
@@ -86,7 +85,7 @@ export default async function HistoricoPage({
         {DIAS_SEMANA.map((d) => (
           <div
             key={d}
-            className="pb-1 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400"
+            className="pb-1 text-center text-xs font-medium text-zinc-500"
           >
             {d}
           </div>
@@ -97,12 +96,12 @@ export default async function HistoricoPage({
 
           const sessoes = porDia.get(dia) ?? [];
           const ehHoje = ehMesAtual && dia === hoje.dia;
-          const ring = ehHoje ? "ring-2 ring-blue-400 dark:ring-blue-500" : "";
+          const ring = ehHoje ? "ring-2 ring-blue-400" : "";
 
           if (sessoes.length === 0) {
             return (
               <div key={dia} className={`${cellBase} ${cellNeutro} ${ring}`}>
-                <span className="text-zinc-400 dark:text-zinc-600">{dia}</span>
+                <span className="text-zinc-400">{dia}</span>
               </div>
             );
           }
@@ -112,12 +111,12 @@ export default async function HistoricoPage({
               <Link
                 key={dia}
                 href={`/sessoes/${sessoes[0].id}`}
-                className={`${cellBase} ${cellMarcado} ${ring} block transition-colors hover:bg-green-100 dark:hover:bg-green-900/40`}
+                className={`${cellBase} ${cellMarcado} ${ring} block transition-colors hover:bg-green-100`}
               >
-                <span className="font-medium text-black dark:text-zinc-50">
+                <span className="font-medium text-black">
                   {dia}
                 </span>
-                <span className="mt-1 block truncate text-xs text-zinc-600 dark:text-zinc-400">
+                <span className="mt-1 block truncate text-xs text-zinc-600">
                   {sessoes[0].treinoNome}
                 </span>
               </Link>
@@ -126,7 +125,7 @@ export default async function HistoricoPage({
 
           return (
             <div key={dia} className={`${cellBase} ${cellMarcado} ${ring}`}>
-              <span className="font-medium text-black dark:text-zinc-50">
+              <span className="font-medium text-black">
                 {dia}
               </span>
               <ul className="mt-1 flex flex-col gap-0.5">
@@ -134,7 +133,7 @@ export default async function HistoricoPage({
                   <li key={s.id}>
                     <Link
                       href={`/sessoes/${s.id}`}
-                      className="block truncate text-xs text-blue-600 hover:underline dark:text-blue-400"
+                      className="block truncate text-xs text-blue-600 hover:underline"
                     >
                       {s.treinoNome}
                     </Link>

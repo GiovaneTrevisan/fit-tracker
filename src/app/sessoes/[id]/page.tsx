@@ -41,29 +41,29 @@ export default async function SessaoDetalhePage({
     <main className="mx-auto w-full max-w-3xl px-6 py-12">
       <Link
         href={`/treinos/${sessao.treinoId}`}
-        className="text-sm text-zinc-600 hover:underline dark:text-zinc-400"
+        className="text-sm text-zinc-600 hover:underline"
       >
         ← Voltar ao treino
       </Link>
 
       <div className="mt-2 flex items-center gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
+        <h1 className="text-2xl font-semibold tracking-tight text-black">
           {sessao.treinoNome}
         </h1>
         {sessao.status === "CONCLUIDA" && (
-          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/40 dark:text-green-400">
+          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
             Concluída
           </span>
         )}
       </div>
 
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="mt-1 text-sm text-zinc-600">
         {sessao.data.toLocaleDateString("pt-BR")} ·{" "}
         {STATUS_LABEL[sessao.status] ?? sessao.status}
       </p>
 
       {sessao.exercicios.length === 0 ? (
-        <p className="mt-6 text-zinc-600 dark:text-zinc-400">
+        <p className="mt-6 text-zinc-600">
           Nenhum exercício ainda
         </p>
       ) : (
@@ -87,15 +87,15 @@ export default async function SessaoDetalhePage({
             return (
               <li
                 key={ex.treinoExercicioId}
-                className="rounded-lg border border-black/[.08] px-4 py-3 dark:border-white/[.145]"
+                className="rounded-lg border border-black/[.08] px-4 py-3"
               >
-                <p className="font-medium text-black dark:text-zinc-50">
+                <p className="font-medium text-black">
                   {ex.nome}
                 </p>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm text-zinc-600">
                   {ex.grupoMuscular} · {ex.seriesAlvo} séries · {reps} reps
                 </p>
-                <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-500">
+                <p className="mt-1 text-sm text-zinc-500">
                   {ultimaVezTexto}
                 </p>
 
@@ -104,7 +104,7 @@ export default async function SessaoDetalhePage({
                     {ex.series.map((s) => (
                       <li
                         key={s.id}
-                        className="flex items-center justify-between gap-4 text-sm text-black dark:text-zinc-50"
+                        className="flex items-center justify-between gap-4 text-sm text-black"
                       >
                         <span>
                           #{s.numero} — {s.carga}kg × {s.reps}
@@ -119,7 +119,7 @@ export default async function SessaoDetalhePage({
                             />
                             <button
                               type="submit"
-                              className="text-sm text-red-600 hover:underline dark:text-red-400"
+                              className="text-sm text-red-600 hover:underline"
                             >
                               Remover
                             </button>
@@ -147,7 +147,7 @@ export default async function SessaoDetalhePage({
           <input type="hidden" name="sessaoId" value={sessao.id} />
           <button
             type="submit"
-            className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+            className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838]"
           >
             Concluir treino
           </button>
