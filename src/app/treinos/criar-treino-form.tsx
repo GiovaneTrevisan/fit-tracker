@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { Button } from "@/components/button";
 import { NOMES_DIAS } from "@/lib/dias-semana";
 import { criarTreino } from "./actions";
 
@@ -42,13 +43,9 @@ export function CriarTreinoForm() {
             </option>
           ))}
         </select>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending} className="disabled:opacity-50">
           {isPending ? "Criando..." : "Criar treino"}
-        </button>
+        </Button>
       </div>
       {erro && <p className="text-sm text-red-600">{erro}</p>}
     </form>
