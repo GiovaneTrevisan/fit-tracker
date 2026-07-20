@@ -9,15 +9,26 @@ import type { ComponentProps } from "react";
 /**
  * Eyebrow / micro-rótulo (ex.: "TREINO DE HOJE"). Diferente do Badge: é texto
  * corrido, não uma pílula.
+ *
+ * Tons:
+ * - claro:        cinza suave, pra eyebrow sobre fundo claro (padrão)
+ * - sobre-escuro: azul de acento (primária), pra eyebrow sobre card preto
  */
+const tonsRotulo = {
+  claro: "text-texto-suave",
+  "sobre-escuro": "text-primaria",
+} as const;
+
 export function Rotulo({
+  tom = "claro",
   className,
   ...props
-}: ComponentProps<"p">) {
+}: ComponentProps<"p"> & { tom?: keyof typeof tonsRotulo }) {
   return (
     <p
       className={[
-        "text-micro font-semibold uppercase tracking-wide text-texto-suave",
+        "text-micro font-semibold uppercase tracking-wide",
+        tonsRotulo[tom],
         className,
       ]
         .filter(Boolean)

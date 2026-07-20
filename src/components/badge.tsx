@@ -12,7 +12,7 @@ import type { ComponentProps } from "react";
  */
 const variantes = {
   neutro: "bg-black/[.06] text-texto-suave",
-  escuro: "bg-white/[.12] text-white",
+  escuro: "bg-white/10 text-white",
   primaria: "bg-primaria text-primaria-texto",
 } as const;
 

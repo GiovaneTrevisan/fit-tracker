@@ -1,5 +1,9 @@
 import Link from "next/link";
+import { Badge } from "@/components/badge";
+import { estilosBotao } from "@/components/button";
+import { Card } from "@/components/card";
 import { Container } from "@/components/container";
+import { Rotulo, Valor } from "@/components/tipografia";
 import { chaveDia, hojeEmSP } from "@/lib/data-sp";
 import { NOMES_DIAS } from "@/lib/dias-semana";
 import { getHeatmapAno, getStreak, getTotalTreinos } from "@/lib/estatisticas";
@@ -21,11 +25,13 @@ const DIAS_ROTULADOS = [1, 3, 5];
 
 const celulaBase = "h-3 w-3 rounded-sm";
 const rotulo = "text-[10px] leading-3 text-zinc-500";
+// Escala de intensidade azul (tokens de consistência). Índice = nº de treinos no dia,
+// saturado por tomPara; vazio (0) usa o cinza neutro.
 const tons = [
   "bg-black/[.06]",
-  "bg-green-100",
-  "bg-green-300",
-  "bg-green-500",
+  "bg-consistencia-1",
+  "bg-consistencia-2",
+  "bg-consistencia-4",
 ];
 
 function tomPara(qtd: number): string {
@@ -111,52 +117,52 @@ export default async function Home() {
     <div className="flex flex-1 flex-col items-center bg-zinc-50 font-sans">
       <main className="flex w-full flex-1 flex-col">
         <Container className="flex flex-1 flex-col gap-6 bg-white py-12">
-          <section className="w-full rounded-xl border border-black/[.08] p-6">
-            <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
-              Treino de Hoje
-            </h2>
+          <Card variante="forte">
+            <Rotulo tom="sobre-escuro">Treino de Hoje</Rotulo>
             {treinoDeHoje ? (
-              <Link
-                href={`/treinos/${treinoDeHoje.id}`}
-                className="mt-1 inline-block text-2xl font-semibold tracking-tight text-black hover:underline"
-              >
-                {treinoDeHoje.nome}
-              </Link>
+              <>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <p className="text-hero font-semibold">
+                    {treinoDeHoje.nome}
+                  </p>
+                  <Badge variante="escuro">
+                    {NOMES_DIAS[treinoDeHoje.diaSemana]}
+                  </Badge>
+                </div>
+                <Link
+                  href={`/treinos/${treinoDeHoje.id}`}
+                  className={`${estilosBotao.base} ${estilosBotao.primaria} mt-5`}
+                >
+                  Ver treino
+                </Link>
+              </>
             ) : (
-              <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-500">
+              <p className="mt-2 text-hero font-semibold">
                 Descanso hoje
               </p>
             )}
-          </section>
+          </Card>
 
-          <section className="w-full rounded-xl border border-black/[.08] p-6">
-            <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
-              Estatísticas
-            </h2>
+          <Card>
+            <Rotulo>Estatísticas</Rotulo>
 
             <div className="mt-4 flex gap-8">
               <div>
-                <p className="text-2xl font-semibold tracking-tight text-black">
-                  {total}
-                </p>
-                <p className="text-sm text-zinc-600">
+                <Valor>{total}</Valor>
+                <Rotulo className="mt-1">
                   {total === 1 ? "treino feito" : "treinos feitos"}
-                </p>
+                </Rotulo>
               </div>
               <div>
-                <p className="text-2xl font-semibold tracking-tight text-black">
-                  {streak}
-                </p>
-                <p className="text-sm text-zinc-600">
+                <Valor>{streak}</Valor>
+                <Rotulo className="mt-1">
                   {streak === 1 ? "treino em sequência" : "treinos em sequência"}
-                </p>
+                </Rotulo>
               </div>
             </div>
 
             <div className="mt-6">
-              <p className="text-xs font-medium text-zinc-500">
-                Consistência em {ano}
-              </p>
+              <Rotulo>Consistência em {ano}</Rotulo>
               {/* Rótulos e grade moram no mesmo bloco que rola: no overflow-x
                   eles deslizam junto e nunca descolam das colunas.
                   O pt-5 não é estético: overflow-x-auto faz o overflow-y virar
@@ -221,7 +227,7 @@ export default async function Home() {
                 </div>
               </div>
             </div>
-          </section>
+          </Card>
         </Container>
       </main>
     </div>
