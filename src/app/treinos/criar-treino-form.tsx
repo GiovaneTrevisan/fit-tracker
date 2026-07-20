@@ -23,12 +23,12 @@ export function CriarTreinoForm() {
 
   return (
     <form ref={formRef} action={handleSubmit} className="mt-6 flex flex-col gap-2">
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           type="text"
           name="nome"
           placeholder="Nome do treino"
-          className="flex-1 rounded-lg border border-black/[.08] bg-transparent px-4 py-2 text-black outline-none focus:border-black/40"
+          className="min-w-0 flex-1 rounded-lg border border-black/[.08] bg-transparent px-4 py-2 text-black outline-none focus:border-black/40"
         />
         <select
           name="diaSemana"

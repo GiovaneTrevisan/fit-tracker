@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Container } from "@/components/container";
 import { hojeEmSP } from "@/lib/data-sp";
 import { getSessoesDoMes } from "@/lib/historico";
 
@@ -55,95 +56,102 @@ export default async function HistoricoPage({
   const cellMarcado = "border-green-300 bg-green-50";
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-12">
-      <Link
-        href="/"
-        className="text-sm text-zinc-600 hover:underline"
-      >
-        ← Início
-      </Link>
-
-      <div className="mt-2 flex items-center justify-between gap-4">
+    <main className="py-12">
+      <Container>
         <Link
-          href={`/historico?mes=${mesAnterior}`}
-          className="rounded-lg border border-black/[.08] px-3 py-1.5 text-sm transition-colors hover:bg-black/[.04]"
+          href="/"
+          className="text-sm text-zinc-600 hover:underline"
         >
-          ◀ Anterior
+          ← Início
         </Link>
-        <h1 className="text-xl font-semibold tracking-tight text-black">
-          {tituloCap}
-        </h1>
-        <Link
-          href={`/historico?mes=${mesProximo}`}
-          className="rounded-lg border border-black/[.08] px-3 py-1.5 text-sm transition-colors hover:bg-black/[.04]"
-        >
-          Próximo ▶
-        </Link>
-      </div>
 
-      <div className="mt-6 grid grid-cols-7 gap-1">
-        {DIAS_SEMANA.map((d) => (
-          <div
-            key={d}
-            className="pb-1 text-center text-xs font-medium text-zinc-500"
-          >
-            {d}
+        {/* No mobile: título em cima e os botões lado a lado embaixo. No desktop,
+            sm:contents dissolve o wrapper e volta ao clássico Anterior · Título ·
+            Próximo em linha, idêntico ao anterior. */}
+        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <h1 className="text-center text-xl font-semibold tracking-tight text-black sm:order-2">
+            {tituloCap}
+          </h1>
+          <div className="flex items-center justify-between gap-2 sm:contents">
+            <Link
+              href={`/historico?mes=${mesAnterior}`}
+              className="shrink-0 whitespace-nowrap rounded-lg border border-black/[.08] px-3 py-1.5 text-sm transition-colors hover:bg-black/[.04] sm:order-1"
+            >
+              ◀ Anterior
+            </Link>
+            <Link
+              href={`/historico?mes=${mesProximo}`}
+              className="shrink-0 whitespace-nowrap rounded-lg border border-black/[.08] px-3 py-1.5 text-sm transition-colors hover:bg-black/[.04] sm:order-3"
+            >
+              Próximo ▶
+            </Link>
           </div>
-        ))}
+        </div>
 
-        {celulas.map((dia, i) => {
-          if (dia === null) return <div key={`vazio-${i}`} />;
+        <div className="mt-6 grid grid-cols-7 gap-1">
+          {DIAS_SEMANA.map((d) => (
+            <div
+              key={d}
+              className="pb-1 text-center text-xs font-medium text-zinc-500"
+            >
+              {d}
+            </div>
+          ))}
 
-          const sessoes = porDia.get(dia) ?? [];
-          const ehHoje = ehMesAtual && dia === hoje.dia;
-          const ring = ehHoje ? "ring-2 ring-blue-400" : "";
+          {celulas.map((dia, i) => {
+            if (dia === null) return <div key={`vazio-${i}`} />;
 
-          if (sessoes.length === 0) {
+            const sessoes = porDia.get(dia) ?? [];
+            const ehHoje = ehMesAtual && dia === hoje.dia;
+            const ring = ehHoje ? "ring-2 ring-blue-400" : "";
+
+            if (sessoes.length === 0) {
+              return (
+                <div key={dia} className={`${cellBase} ${cellNeutro} ${ring}`}>
+                  <span className="text-zinc-400">{dia}</span>
+                </div>
+              );
+            }
+
+            if (sessoes.length === 1) {
+              return (
+                <Link
+                  key={dia}
+                  href={`/sessoes/${sessoes[0].id}`}
+                  className={`${cellBase} ${cellMarcado} ${ring} block transition-colors hover:bg-green-100`}
+                >
+                  <span className="font-medium text-black">
+                    {dia}
+                  </span>
+                  <span className="mt-1 block truncate text-xs text-zinc-600">
+                    {sessoes[0].treinoNome}
+                  </span>
+                </Link>
+              );
+            }
+
             return (
-              <div key={dia} className={`${cellBase} ${cellNeutro} ${ring}`}>
-                <span className="text-zinc-400">{dia}</span>
-              </div>
-            );
-          }
-
-          if (sessoes.length === 1) {
-            return (
-              <Link
-                key={dia}
-                href={`/sessoes/${sessoes[0].id}`}
-                className={`${cellBase} ${cellMarcado} ${ring} block transition-colors hover:bg-green-100`}
-              >
+              <div key={dia} className={`${cellBase} ${cellMarcado} ${ring}`}>
                 <span className="font-medium text-black">
                   {dia}
                 </span>
-                <span className="mt-1 block truncate text-xs text-zinc-600">
-                  {sessoes[0].treinoNome}
-                </span>
-              </Link>
+                <ul className="mt-1 flex flex-col gap-0.5">
+                  {sessoes.map((s) => (
+                    <li key={s.id}>
+                      <Link
+                        href={`/sessoes/${s.id}`}
+                        className="block truncate text-xs text-blue-600 hover:underline"
+                      >
+                        {s.treinoNome}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             );
-          }
-
-          return (
-            <div key={dia} className={`${cellBase} ${cellMarcado} ${ring}`}>
-              <span className="font-medium text-black">
-                {dia}
-              </span>
-              <ul className="mt-1 flex flex-col gap-0.5">
-                {sessoes.map((s) => (
-                  <li key={s.id}>
-                    <Link
-                      href={`/sessoes/${s.id}`}
-                      className="block truncate text-xs text-blue-600 hover:underline"
-                    >
-                      {s.treinoNome}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
+          })}
+        </div>
+      </Container>
     </main>
   );
 }

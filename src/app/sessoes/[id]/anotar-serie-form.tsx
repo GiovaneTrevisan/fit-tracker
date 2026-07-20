@@ -33,7 +33,7 @@ export function AnotarSerieForm({
     <form ref={formRef} action={handleSubmit} className="mt-3 flex flex-col gap-2">
       <input type="hidden" name="sessaoId" value={sessaoId} />
       <input type="hidden" name="exercicioId" value={exercicioId} />
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <input
           type="number"
           name="carga"

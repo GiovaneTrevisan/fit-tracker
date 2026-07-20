@@ -43,7 +43,7 @@ export function AdicionarExercicioForm({ treinoId }: { treinoId: string }) {
           className={`${inputClass} flex-1`}
         />
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <input
           type="number"
           name="seriesAlvo"
