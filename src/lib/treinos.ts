@@ -27,6 +27,43 @@ export async function getTreinos(): Promise<TreinoResumo[]> {
   }));
 }
 
+export interface SemanaDeTreinos {
+  /** 7 baldes indexados por diaSemana (0=Domingo … 6=Sábado). Cada dia pode ter
+   *  mais de um treino (o schema não impõe unicidade), então é lista por dia. */
+  porDia: TreinoResumo[][];
+  /** Treinos avulsos (sem dia da semana). */
+  avulsos: TreinoResumo[];
+}
+
+/**
+ * Treinos não arquivados organizados para a visão semanal: distribuídos pelos 7
+ * dias da semana + uma lista separada de avulsos (diaSemana null). Mesma base de
+ * `getTreinos` (contagem de exercícios via `_count`), só reorganizada.
+ */
+export async function getTreinosDaSemana(): Promise<SemanaDeTreinos> {
+  const treinos = await prisma.treino.findMany({
+    where: { arquivado: false },
+    orderBy: { createdAt: "asc" },
+    include: { _count: { select: { exercicios: true } } },
+  });
+
+  const porDia: TreinoResumo[][] = Array.from({ length: 7 }, () => []);
+  const avulsos: TreinoResumo[] = [];
+
+  for (const t of treinos) {
+    const resumo: TreinoResumo = {
+      id: t.id,
+      nome: t.nome,
+      diaSemana: t.diaSemana,
+      totalExercicios: t._count.exercicios,
+    };
+    if (t.diaSemana === null) avulsos.push(resumo);
+    else porDia[t.diaSemana].push(resumo);
+  }
+
+  return { porDia, avulsos };
+}
+
 export interface ExercicioDoTreino {
   treinoExercicioId: string;
   nome: string;
