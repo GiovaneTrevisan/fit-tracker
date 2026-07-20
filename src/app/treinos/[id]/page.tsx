@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Container } from "@/components/container";
 import { getTreino } from "@/lib/treinos";
 import { iniciarSessao } from "@/app/sessoes/actions";
 import { AdicionarExercicioForm } from "./adicionar-exercicio-form";
@@ -31,94 +32,96 @@ export default async function TreinoDetalhePage({
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-12">
-      <Link
-        href="/treinos"
-        className="text-sm text-zinc-600 hover:underline"
-      >
-        ← Treinos
-      </Link>
+    <main className="py-12">
+      <Container>
+        <Link
+          href="/treinos"
+          className="text-sm text-zinc-600 hover:underline"
+        >
+          ← Treinos
+        </Link>
 
-      <div className="mt-2 flex items-center gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-black">
-          {treino.nome}
-        </h1>
-        <SeloDia diaSemana={treino.diaSemana} />
-        {arquivado && (
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-            Arquivado
-          </span>
+        <div className="mt-2 flex items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight text-black">
+            {treino.nome}
+          </h1>
+          <SeloDia diaSemana={treino.diaSemana} />
+          {arquivado && (
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+              Arquivado
+            </span>
+          )}
+        </div>
+
+        {!arquivado && (
+          <>
+            <EditarDiaForm treinoId={treino.id} diaSemana={treino.diaSemana} />
+
+            <form action={iniciarAction} className="mt-4">
+              <input type="hidden" name="treinoId" value={treino.id} />
+              <button
+                type="submit"
+                className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50"
+              >
+                Iniciar treino
+              </button>
+            </form>
+          </>
         )}
-      </div>
 
-      {!arquivado && (
-        <>
-          <EditarDiaForm treinoId={treino.id} diaSemana={treino.diaSemana} />
+        {treino.exercicios.length === 0 ? (
+          <p className="mt-6 text-zinc-600">
+            Nenhum exercício ainda
+          </p>
+        ) : (
+          <ul className="mt-6 flex flex-col gap-3">
+            {treino.exercicios.map((ex) => {
+              const reps =
+                ex.repsAlvoMin === ex.repsAlvoMax
+                  ? `${ex.repsAlvoMin}`
+                  : `${ex.repsAlvoMin}–${ex.repsAlvoMax}`;
+              return (
+                <li
+                  key={ex.treinoExercicioId}
+                  className="flex items-center justify-between gap-4 rounded-lg border border-black/[.08] px-4 py-3"
+                >
+                  <div>
+                    <p className="font-medium text-black">
+                      {ex.nome}
+                    </p>
+                    <p className="text-sm text-zinc-600">
+                      {ex.grupoMuscular} · {ex.seriesAlvo} séries · {reps} reps
+                    </p>
+                  </div>
+                  {!arquivado && (
+                    <form action={removerAction}>
+                      <input
+                        type="hidden"
+                        name="treinoExercicioId"
+                        value={ex.treinoExercicioId}
+                      />
+                      <input type="hidden" name="treinoId" value={treino.id} />
+                      <button
+                        type="submit"
+                        className="text-sm text-red-600 hover:underline"
+                      >
+                        Remover
+                      </button>
+                    </form>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
-          <form action={iniciarAction} className="mt-4">
-            <input type="hidden" name="treinoId" value={treino.id} />
-            <button
-              type="submit"
-              className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50"
-            >
-              Iniciar treino
-            </button>
-          </form>
-        </>
-      )}
-
-      {treino.exercicios.length === 0 ? (
-        <p className="mt-6 text-zinc-600">
-          Nenhum exercício ainda
-        </p>
-      ) : (
-        <ul className="mt-6 flex flex-col gap-3">
-          {treino.exercicios.map((ex) => {
-            const reps =
-              ex.repsAlvoMin === ex.repsAlvoMax
-                ? `${ex.repsAlvoMin}`
-                : `${ex.repsAlvoMin}–${ex.repsAlvoMax}`;
-            return (
-            <li
-              key={ex.treinoExercicioId}
-              className="flex items-center justify-between gap-4 rounded-lg border border-black/[.08] px-4 py-3"
-            >
-              <div>
-                <p className="font-medium text-black">
-                  {ex.nome}
-                </p>
-                <p className="text-sm text-zinc-600">
-                  {ex.grupoMuscular} · {ex.seriesAlvo} séries · {reps} reps
-                </p>
-              </div>
-              {!arquivado && (
-                <form action={removerAction}>
-                  <input
-                    type="hidden"
-                    name="treinoExercicioId"
-                    value={ex.treinoExercicioId}
-                  />
-                  <input type="hidden" name="treinoId" value={treino.id} />
-                  <button
-                    type="submit"
-                    className="text-sm text-red-600 hover:underline"
-                  >
-                    Remover
-                  </button>
-                </form>
-              )}
-            </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {!arquivado && (
-        <>
-          <AdicionarExercicioForm treinoId={treino.id} />
-          <DeletarTreinoForm treinoId={treino.id} />
-        </>
-      )}
+        {!arquivado && (
+          <>
+            <AdicionarExercicioForm treinoId={treino.id} />
+            <DeletarTreinoForm treinoId={treino.id} />
+          </>
+        )}
+      </Container>
     </main>
   );
 }

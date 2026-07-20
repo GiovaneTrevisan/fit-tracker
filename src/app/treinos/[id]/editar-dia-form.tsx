@@ -28,7 +28,7 @@ export function EditarDiaForm({
 
   return (
     <form action={handleSubmit} className="mt-4 flex flex-col gap-2">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <label
           htmlFor="diaSemana"
           className="text-sm text-zinc-600"

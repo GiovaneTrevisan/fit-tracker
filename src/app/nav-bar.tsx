@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Container } from "@/components/container";
 
 const LINKS = [
   { href: "/", label: "Início" },
@@ -19,7 +20,7 @@ export function NavBar() {
 
   return (
     <nav className="sticky top-0 z-10 border-b border-black/[.08] bg-white/80 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-3xl gap-1 px-6 py-3">
+      <Container className="flex gap-1 py-2">
         {LINKS.map((link) => {
           const ativo =
             link.href === "/"
@@ -32,15 +33,15 @@ export function NavBar() {
               aria-current={ativo ? "page" : undefined}
               className={
                 ativo
-                  ? "rounded-lg px-3 py-1.5 text-sm font-semibold text-black"
-                  : "rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-black/[.04] hover:text-black"
+                  ? "rounded-lg px-3 py-2.5 text-sm font-semibold text-black"
+                  : "rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-black/[.04] hover:text-black"
               }
             >
               {link.label}
             </Link>
           );
         })}
-      </div>
+      </Container>
     </nav>
   );
 }
