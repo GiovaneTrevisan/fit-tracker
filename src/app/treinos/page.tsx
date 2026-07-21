@@ -5,6 +5,7 @@ import { Container } from "@/components/container";
 import { Rotulo } from "@/components/tipografia";
 import { NOMES_DIAS } from "@/lib/dias-semana";
 import { getTreinosDaSemana } from "@/lib/treinos";
+import { imagemDoTreino } from "@/lib/treino-imagem";
 import { CriarTreinoForm } from "./criar-treino-form";
 
 function contagem(n: number): string {
@@ -42,7 +43,7 @@ export default async function TreinosPage() {
                 href={`/treinos/${treino.id}`}
                 className="block"
               >
-                <Card variante="forte">
+                <Card variante="forte" imagem={imagemDoTreino(treino.nome)}>
                   <Badge variante="escuro">{nomeDia}</Badge>
                   <p className="mt-3 text-titulo font-semibold">
                     {treino.nome}
@@ -67,7 +68,7 @@ export default async function TreinosPage() {
                 href={`/treinos/${treino.id}`}
                 className="block"
               >
-                <Card variante="forte">
+                <Card variante="forte" imagem={imagemDoTreino(treino.nome)}>
                   <p className="text-titulo font-semibold">
                     {treino.nome}
                   </p>
