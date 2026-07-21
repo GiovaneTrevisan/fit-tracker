@@ -8,6 +8,7 @@ import { chaveDia, hojeEmSP } from "@/lib/data-sp";
 import { NOMES_DIAS } from "@/lib/dias-semana";
 import { getHeatmapAno, getStreak, getTotalTreinos } from "@/lib/estatisticas";
 import { getTreinoDeHoje } from "@/lib/treinos";
+import { imagemDoTreino } from "@/lib/treino-imagem";
 
 // Depende do dia atual (fuso SP), que muda à meia-noite: renderiza a cada
 // request pra "Treino de Hoje" nunca ficar preso no dia do build.
@@ -112,12 +113,13 @@ export default async function Home() {
     getHeatmapAno(ano),
   ]);
   const celulas = celulasDoAno(ano);
+  const imgHoje = treinoDeHoje ? imagemDoTreino(treinoDeHoje.nome) : null;
 
   return (
     <div className="flex flex-1 flex-col items-center bg-zinc-50 font-sans">
       <main className="flex w-full flex-1 flex-col">
         <Container className="flex flex-1 flex-col gap-6 bg-white py-12">
-          <Card variante="forte">
+          <Card variante="forte" imagem={imgHoje} prioridade>
             <Rotulo tom="sobre-escuro">Treino de Hoje</Rotulo>
             {treinoDeHoje ? (
               <>

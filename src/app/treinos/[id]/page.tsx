@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Card } from "@/components/card";
 import { Container } from "@/components/container";
 import { getTreino } from "@/lib/treinos";
+import { imagemDoTreino } from "@/lib/treino-imagem";
 import { iniciarSessao } from "@/app/sessoes/actions";
 import { AdicionarExercicioForm } from "./adicionar-exercicio-form";
 import { EditarDiaForm } from "./editar-dia-form";
@@ -41,17 +43,21 @@ export default async function TreinoDetalhePage({
           ← Treinos
         </Link>
 
-        <div className="mt-2 flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight text-black">
-            {treino.nome}
-          </h1>
-          <SeloDia diaSemana={treino.diaSemana} />
-          {arquivado && (
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-              Arquivado
-            </span>
-          )}
-        </div>
+        <Card
+          variante="forte"
+          imagem={imagemDoTreino(treino.nome)}
+          className="mt-2"
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-titulo font-semibold">{treino.nome}</h1>
+            <SeloDia diaSemana={treino.diaSemana} variante="escuro" />
+            {arquivado && (
+              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white">
+                Arquivado
+              </span>
+            )}
+          </div>
+        </Card>
 
         {!arquivado && (
           <>

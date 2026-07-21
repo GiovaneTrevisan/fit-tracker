@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# imagens 4K de origem — só as versões leves (public/treinos/*.webp) vão pro repo
+/imagens-originais/
