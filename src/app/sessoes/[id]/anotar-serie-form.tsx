@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { Button } from "@/components/button";
 import { adicionarSerie } from "./actions";
 
 export function AnotarSerieForm({
@@ -27,36 +28,36 @@ export function AnotarSerieForm({
   }
 
   const inputClass =
-    "rounded-lg border border-black/[.08] bg-transparent px-4 py-2 text-black outline-none focus:border-black/40";
+    "rounded-card border border-black/[.08] bg-transparent px-4 py-3 text-grande text-black outline-none focus:border-black/40";
 
   return (
-    <form ref={formRef} action={handleSubmit} className="mt-3 flex flex-col gap-2">
+    <form ref={formRef} action={handleSubmit} className="mt-4 flex flex-col gap-3">
       <input type="hidden" name="sessaoId" value={sessaoId} />
       <input type="hidden" name="exercicioId" value={exercicioId} />
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2">
         <input
           type="number"
           name="carga"
           min={0}
           step="0.5"
           placeholder="Carga (kg)"
-          className={`${inputClass} w-32`}
+          className={`${inputClass} min-w-0 flex-1`}
         />
         <input
           type="number"
           name="reps"
           min={1}
           placeholder="Reps"
-          className={`${inputClass} w-24`}
+          className={`${inputClass} min-w-0 flex-1`}
         />
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50"
-        >
-          {isPending ? "Anotando..." : "Anotar série"}
-        </button>
       </div>
+      <Button
+        type="submit"
+        disabled={isPending}
+        className="w-full disabled:opacity-50"
+      >
+        {isPending ? "Anotando..." : "Anotar série"}
+      </Button>
       {erro && <p className="text-sm text-red-600">{erro}</p>}
     </form>
   );
