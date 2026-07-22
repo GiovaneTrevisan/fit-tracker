@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { Button } from "@/components/button";
 import { adicionarExercicio } from "./actions";
 
 export function AdicionarExercicioForm({ treinoId }: { treinoId: string }) {
@@ -26,7 +27,7 @@ export function AdicionarExercicioForm({ treinoId }: { treinoId: string }) {
   return (
     <form ref={formRef} action={handleSubmit} className="mt-8 flex flex-col gap-2">
       <input type="hidden" name="treinoId" value={treinoId} />
-      <h2 className="text-lg font-medium text-black">
+      <h2 className="text-secao font-semibold text-forte">
         Adicionar exercício
       </h2>
       <div className="flex flex-col gap-2 sm:flex-row">
@@ -65,13 +66,14 @@ export function AdicionarExercicioForm({ treinoId }: { treinoId: string }) {
           placeholder="Reps máx"
           className={`${inputClass} w-32`}
         />
-        <button
+        <Button
           type="submit"
+          variante="contorno"
           disabled={isPending}
-          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50"
+          className="disabled:opacity-50"
         >
           {isPending ? "Adicionando..." : "Adicionar exercício"}
-        </button>
+        </Button>
       </div>
       {erro && <p className="text-sm text-red-600">{erro}</p>}
     </form>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Button } from "@/components/button";
 import { NOMES_DIAS } from "@/lib/dias-semana";
 import { definirDiaTreino } from "./actions";
 
@@ -31,7 +32,7 @@ export function EditarDiaForm({
       <div className="flex flex-wrap items-center gap-2">
         <label
           htmlFor="diaSemana"
-          className="text-sm text-zinc-600"
+          className="text-rotulo text-texto-suave"
         >
           Dia da semana
         </label>
@@ -49,13 +50,14 @@ export function EditarDiaForm({
             </option>
           ))}
         </select>
-        <button
+        <Button
           type="submit"
+          variante="contorno"
           disabled={isPending}
-          className="rounded-lg border border-black/[.08] px-4 py-2 font-medium transition-colors hover:bg-black/[.04] disabled:opacity-50"
+          className="disabled:opacity-50"
         >
           {isPending ? "Salvando..." : "Salvar dia"}
-        </button>
+        </Button>
       </div>
       {erro && <p className="text-sm text-red-600">{erro}</p>}
     </form>
