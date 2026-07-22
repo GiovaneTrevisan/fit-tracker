@@ -68,7 +68,6 @@ export function AdicionarExercicioForm({ treinoId }: { treinoId: string }) {
         />
         <Button
           type="submit"
-          variante="contorno"
           disabled={isPending}
           className="disabled:opacity-50"
         >

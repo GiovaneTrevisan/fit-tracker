@@ -9,6 +9,7 @@ import { getSessao, type ExercicioDaSessao } from "@/lib/sessoes";
 import { getUltimaVez } from "@/lib/ultima-vez";
 import { imagemDoTreino } from "@/lib/treino-imagem";
 import { AnotarSerieForm } from "./anotar-serie-form";
+import { AdicionarExercicioAvulsoForm } from "./adicionar-exercicio-avulso-form";
 import { concluirSessao, removerSerie } from "./actions";
 
 function faixaReps(min: number, max: number): string {
@@ -160,8 +161,14 @@ async function SessaoConteudo({
         <h2 className="text-secao font-semibold text-forte">{ativo.nome}</h2>
         <p className="text-rotulo text-texto-suave">{ativo.grupoMuscular}</p>
         <div className="mt-2 flex flex-wrap gap-2">
-          <Badge>{ativo.seriesAlvo} séries</Badge>
-          <Badge>{faixaReps(ativo.repsAlvoMin, ativo.repsAlvoMax)} reps</Badge>
+          {ativo.avulso ? (
+            <Badge>Avulso</Badge>
+          ) : (
+            <>
+              <Badge>{ativo.seriesAlvo} séries</Badge>
+              <Badge>{faixaReps(ativo.repsAlvoMin, ativo.repsAlvoMax)} reps</Badge>
+            </>
+          )}
         </div>
 
         {ativo.series.length > 0 && (
@@ -227,7 +234,7 @@ async function SessaoConteudo({
             const ativoItem = i === ativoIndex;
             const feito = ex.series.length > 0;
             return (
-              <li key={ex.treinoExercicioId}>
+              <li key={ex.exercicioId}>
                 <Link
                   href={navLink(ex.exercicioId)}
                   className={`flex items-center justify-between gap-3 rounded-card border px-4 py-3 transition-colors ${
@@ -244,13 +251,23 @@ async function SessaoConteudo({
                       {ex.grupoMuscular}
                     </span>
                   </span>
-                  {feito && <Badge variante="primaria">✓</Badge>}
+                  <span className="flex shrink-0 items-center gap-2">
+                    {ex.avulso && <Badge>Avulso</Badge>}
+                    {feito && <Badge variante="primaria">✓</Badge>}
+                  </span>
                 </Link>
               </li>
             );
           })}
         </ul>
       </div>
+
+      {emAndamento && (
+        <div className="mt-8">
+          <Rotulo>Adicionar exercício a esta sessão</Rotulo>
+          <AdicionarExercicioAvulsoForm sessaoId={sessaoId} />
+        </div>
+      )}
 
       {emAndamento && (
         <form action={concluirAction} className="mt-8">

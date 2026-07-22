@@ -44,6 +44,65 @@ export async function adicionarSerie(
 }
 
 /**
+ * Adiciona um exercício avulso (fora do plano) a uma sessão em andamento, já com
+ * a primeira série. Valida no servidor. Reutiliza o Exercicio do catálogo se já
+ * existir um com esse nome (case-insensitive, com trim) ou cria um novo — mesma
+ * lógica de `adicionarExercicio` do treino; o grupo muscular só é exigido quando
+ * o exercício é novo. A série liga direto sessão + exercício (SerieRegistrada não
+ * passa por TreinoExercicio), então nada de plano é tocado: se o exercício já
+ * estiver no treino, a série simplesmente entra nele.
+ */
+export async function adicionarExercicioAvulso(
+  formData: FormData,
+): Promise<SerieResult> {
+  const sessaoId = String(formData.get("sessaoId") ?? "");
+  const nome = String(formData.get("nome") ?? "").trim();
+  const grupoMuscular = String(formData.get("grupoMuscular") ?? "").trim();
+  const carga = Number(formData.get("carga"));
+  const reps = Number(formData.get("reps"));
+
+  if (sessaoId === "") {
+    return { error: "Sessão inválida" };
+  }
+  if (nome === "") {
+    return { error: "Informe o nome do exercício" };
+  }
+  if (!Number.isFinite(carga) || carga <= 0) {
+    return { error: "Carga deve ser maior que zero" };
+  }
+  if (!Number.isInteger(reps) || reps < 1) {
+    return { error: "Reps deve ser um inteiro maior que zero" };
+  }
+
+  // Reutiliza o exercício do catálogo se já existir (case-insensitive).
+  let exercicio = await prisma.exercicio.findFirst({
+    where: { nome: { equals: nome, mode: "insensitive" } },
+  });
+
+  if (!exercicio) {
+    if (grupoMuscular === "") {
+      return { error: "Informe o grupo muscular" };
+    }
+    exercicio = await prisma.exercicio.create({
+      data: { nome, grupoMuscular },
+    });
+  }
+
+  const ultima = await prisma.serieRegistrada.aggregate({
+    where: { sessaoId, exercicioId: exercicio.id },
+    _max: { numero: true },
+  });
+  const numero = (ultima._max.numero ?? 0) + 1;
+
+  await prisma.serieRegistrada.create({
+    data: { sessaoId, exercicioId: exercicio.id, numero, carga, reps },
+  });
+
+  revalidatePath(`/sessoes/${sessaoId}`);
+  return { ok: true };
+}
+
+/**
  * Remove uma série registrada. Revalida a página da sessão.
  */
 export async function removerSerie(
