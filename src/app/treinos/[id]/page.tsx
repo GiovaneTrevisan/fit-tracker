@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Badge } from "@/components/badge";
+import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { Container } from "@/components/container";
 import { getTreino } from "@/lib/treinos";
@@ -38,7 +40,7 @@ export default async function TreinoDetalhePage({
       <Container>
         <Link
           href="/treinos"
-          className="text-sm text-zinc-600 hover:underline"
+          className="text-rotulo text-texto-suave hover:underline"
         >
           ← Treinos
         </Link>
@@ -51,11 +53,7 @@ export default async function TreinoDetalhePage({
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-titulo font-semibold">{treino.nome}</h1>
             <SeloDia diaSemana={treino.diaSemana} variante="escuro" />
-            {arquivado && (
-              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white">
-                Arquivado
-              </span>
-            )}
+            {arquivado && <Badge variante="escuro">Arquivado</Badge>}
           </div>
         </Card>
 
@@ -65,20 +63,15 @@ export default async function TreinoDetalhePage({
 
             <form action={iniciarAction} className="mt-4">
               <input type="hidden" name="treinoId" value={treino.id} />
-              <button
-                type="submit"
-                className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50"
-              >
-                Iniciar treino
-              </button>
+              <Button type="submit">Iniciar treino</Button>
             </form>
           </>
         )}
 
         {treino.exercicios.length === 0 ? (
-          <p className="mt-6 text-zinc-600">
-            Nenhum exercício ainda
-          </p>
+          <Card variante="superficie" className="mt-6">
+            <p className="text-texto-suave">Nenhum exercício ainda</p>
+          </Card>
         ) : (
           <ul className="mt-6 flex flex-col gap-3">
             {treino.exercicios.map((ex) => {
@@ -89,15 +82,19 @@ export default async function TreinoDetalhePage({
               return (
                 <li
                   key={ex.treinoExercicioId}
-                  className="flex items-center justify-between gap-4 rounded-lg border border-black/[.08] px-4 py-3"
+                  className="flex items-center justify-between gap-4 rounded-card border border-black/[.08] bg-superficie px-4 py-3"
                 >
                   <div>
-                    <p className="font-medium text-black">
+                    <p className="text-grande font-semibold text-forte">
                       {ex.nome}
                     </p>
-                    <p className="text-sm text-zinc-600">
-                      {ex.grupoMuscular} · {ex.seriesAlvo} séries · {reps} reps
+                    <p className="text-rotulo text-texto-suave">
+                      {ex.grupoMuscular}
                     </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Badge>{ex.seriesAlvo} séries</Badge>
+                      <Badge>{reps} reps</Badge>
+                    </div>
                   </div>
                   {!arquivado && (
                     <form action={removerAction}>
@@ -109,7 +106,7 @@ export default async function TreinoDetalhePage({
                       <input type="hidden" name="treinoId" value={treino.id} />
                       <button
                         type="submit"
-                        className="text-sm text-red-600 hover:underline"
+                        className="text-rotulo text-texto-suave transition-colors hover:text-red-600"
                       >
                         Remover
                       </button>
