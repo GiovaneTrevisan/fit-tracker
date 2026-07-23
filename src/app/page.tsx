@@ -4,6 +4,7 @@ import { estilosBotao } from "@/components/button";
 import { Card } from "@/components/card";
 import { Container } from "@/components/container";
 import { Rotulo, Valor } from "@/components/tipografia";
+import { tomConsistencia } from "@/lib/consistencia";
 import { chaveDia, hojeEmSP } from "@/lib/data-sp";
 import { NOMES_DIAS } from "@/lib/dias-semana";
 import { getHeatmapAno, getStreak, getTotalTreinos } from "@/lib/estatisticas";
@@ -26,18 +27,6 @@ const DIAS_ROTULADOS = [1, 3, 5];
 
 const celulaBase = "h-3 w-3 rounded-sm";
 const rotulo = "text-[10px] leading-3 text-zinc-500";
-// Escala de intensidade azul (tokens de consistência). Índice = nº de treinos no dia,
-// saturado por tomPara; vazio (0) usa o cinza neutro.
-const tons = [
-  "bg-black/[.06]",
-  "bg-consistencia-1",
-  "bg-consistencia-2",
-  "bg-consistencia-4",
-];
-
-function tomPara(qtd: number): string {
-  return tons[Math.min(qtd, tons.length - 1)];
-}
 
 const tooltipBase =
   "pointer-events-none absolute bottom-full z-10 mb-1 hidden whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[11px] leading-4 font-medium text-zinc-50 shadow-sm group-hover:block";
@@ -211,7 +200,7 @@ export default async function Home() {
                         return (
                           <div
                             key={i}
-                            className={`group relative ${celulaBase} ${tomPara(qtd)}`}
+                            className={`group relative ${celulaBase} ${tomConsistencia(qtd)}`}
                           >
                             <span
                               className={`${tooltipBase} ${ancoragem(

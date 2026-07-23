@@ -62,3 +62,13 @@ export function hojeEmSP(): { ano: number; mes: number; dia: number } {
 export function chaveDia(p: { ano: number; mes: number; dia: number }): string {
   return `${p.ano}-${String(p.mes).padStart(2, "0")}-${String(p.dia).padStart(2, "0")}`;
 }
+
+/** "HH:MM" (24h) de um instante, no fuso America/Sao_Paulo. */
+export function horaMinutoSP(d: Date): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: TZ,
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d);
+}
