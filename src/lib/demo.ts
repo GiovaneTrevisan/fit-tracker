@@ -15,3 +15,13 @@ export const TEXTO_MODO_DEMO = "Modo demonstração — somente leitura";
 export function isModoDemo(): boolean {
   return process.env.MODO_DEMO === "true";
 }
+
+/**
+ * Id da sessão EM_ANDAMENTO de exemplo pra onde "Iniciar treino" leva em modo
+ * demo, pra a demo alcançar a tela de execução sem criar sessão. Só consultado
+ * quando `isModoDemo()` é true; sem a env, o modo demo volta a recusar o início
+ * de sessão — a ausência nunca destrava escrita.
+ */
+export function getDemoSessaoId(): string | null {
+  return process.env.DEMO_SESSAO_ID?.trim() || null;
+}
