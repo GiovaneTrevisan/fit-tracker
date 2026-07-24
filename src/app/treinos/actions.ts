@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { NOMES_DIAS, parseDiaSemana } from "@/lib/dias-semana";
+import { isModoDemo, TEXTO_MODO_DEMO } from "@/lib/demo";
 
 export type CriarTreinoResult = { ok: true } | { error: string };
 
@@ -24,6 +25,8 @@ function isUniqueViolation(e: unknown): boolean {
 export async function criarTreino(
   formData: FormData,
 ): Promise<CriarTreinoResult> {
+  if (isModoDemo()) return { error: TEXTO_MODO_DEMO };
+
   const nome = String(formData.get("nome") ?? "").trim();
 
   if (nome === "") {
