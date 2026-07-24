@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { isModoDemo, TEXTO_MODO_DEMO } from "@/lib/demo";
 
 export type SerieResult = { ok: true } | { error: string };
 
@@ -14,6 +15,8 @@ export type SerieResult = { ok: true } | { error: string };
 export async function adicionarSerie(
   formData: FormData,
 ): Promise<SerieResult> {
+  if (isModoDemo()) return { error: TEXTO_MODO_DEMO };
+
   const sessaoId = String(formData.get("sessaoId") ?? "");
   const exercicioId = String(formData.get("exercicioId") ?? "");
   const carga = Number(formData.get("carga"));
@@ -55,6 +58,8 @@ export async function adicionarSerie(
 export async function adicionarExercicioAvulso(
   formData: FormData,
 ): Promise<SerieResult> {
+  if (isModoDemo()) return { error: TEXTO_MODO_DEMO };
+
   const sessaoId = String(formData.get("sessaoId") ?? "");
   const nome = String(formData.get("nome") ?? "").trim();
   const grupoMuscular = String(formData.get("grupoMuscular") ?? "").trim();
@@ -108,6 +113,8 @@ export async function adicionarExercicioAvulso(
 export async function removerSerie(
   formData: FormData,
 ): Promise<SerieResult> {
+  if (isModoDemo()) return { error: TEXTO_MODO_DEMO };
+
   const serieId = String(formData.get("serieId") ?? "");
   const sessaoId = String(formData.get("sessaoId") ?? "");
 
@@ -127,6 +134,12 @@ export async function removerSerie(
  * Redireciona para a página do treino da sessão.
  */
 export async function concluirSessao(sessaoId: string): Promise<never> {
+  // Recusa lançando (não retornando): a action termina em redirect, então não
+  // tem canal de erro — mesmo caminho das validações abaixo.
+  if (isModoDemo()) {
+    throw new Error(TEXTO_MODO_DEMO);
+  }
+
   if (!sessaoId) {
     throw new Error("Sessão inválida");
   }

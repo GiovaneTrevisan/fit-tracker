@@ -5,6 +5,7 @@ import { Button, estilosBotao } from "@/components/button";
 import { Card } from "@/components/card";
 import { Container } from "@/components/container";
 import { Rotulo } from "@/components/tipografia";
+import { isModoDemo } from "@/lib/demo";
 import { getSessao, type ExercicioDaSessao } from "@/lib/sessoes";
 import { getUltimaVez } from "@/lib/ultima-vez";
 import { imagemDoTreino } from "@/lib/treino-imagem";
@@ -29,7 +30,8 @@ export default async function SessaoDetalhePage({
 
   if (!sessao) notFound();
 
-  const emAndamento = sessao.status === "EM_ANDAMENTO";
+  // Toda a UI de escrita da tela: só com a sessão em andamento e fora do demo.
+  const podeEditar = sessao.status === "EM_ANDAMENTO" && !isModoDemo();
   const dataFmt = sessao.data.toLocaleDateString("pt-BR");
 
   async function removerSerieAction(formData: FormData) {
@@ -77,7 +79,7 @@ export default async function SessaoDetalhePage({
         ) : (
           <SessaoConteudo
             sessaoId={sessao.id}
-            emAndamento={emAndamento}
+            podeEditar={podeEditar}
             exercicios={sessao.exercicios}
             exParam={exParam}
             removerSerieAction={removerSerieAction}
@@ -91,14 +93,14 @@ export default async function SessaoDetalhePage({
 
 async function SessaoConteudo({
   sessaoId,
-  emAndamento,
+  podeEditar,
   exercicios,
   exParam,
   removerSerieAction,
   concluirAction,
 }: {
   sessaoId: string;
-  emAndamento: boolean;
+  podeEditar: boolean;
   exercicios: ExercicioDaSessao[];
   exParam?: string;
   removerSerieAction: (formData: FormData) => Promise<void>;
@@ -181,7 +183,7 @@ async function SessaoConteudo({
                 <span>
                   #{s.numero} — {s.carga}kg × {s.reps}
                 </span>
-                {emAndamento && (
+                {podeEditar && (
                   <form action={removerSerieAction}>
                     <input type="hidden" name="serieId" value={s.id} />
                     <input type="hidden" name="sessaoId" value={sessaoId} />
@@ -222,7 +224,7 @@ async function SessaoConteudo({
           )}
         </Card>
 
-        {emAndamento && (
+        {podeEditar && (
           <AnotarSerieForm sessaoId={sessaoId} exercicioId={ativo.exercicioId} />
         )}
       </Card>
@@ -262,14 +264,14 @@ async function SessaoConteudo({
         </ul>
       </div>
 
-      {emAndamento && (
+      {podeEditar && (
         <div className="mt-8">
           <Rotulo>Adicionar exercício a esta sessão</Rotulo>
           <AdicionarExercicioAvulsoForm sessaoId={sessaoId} />
         </div>
       )}
 
-      {emAndamento && (
+      {podeEditar && (
         <form action={concluirAction} className="mt-8">
           <input type="hidden" name="sessaoId" value={sessaoId} />
           <Button type="submit">Concluir treino</Button>

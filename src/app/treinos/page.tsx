@@ -3,6 +3,7 @@ import { Badge } from "@/components/badge";
 import { Card } from "@/components/card";
 import { Container } from "@/components/container";
 import { Rotulo } from "@/components/tipografia";
+import { isModoDemo } from "@/lib/demo";
 import { NOMES_DIAS } from "@/lib/dias-semana";
 import { getTreinosDaSemana } from "@/lib/treinos";
 import { imagemDoTreino } from "@/lib/treino-imagem";
@@ -22,7 +23,7 @@ export default async function TreinosPage() {
           Treinos
         </h1>
 
-        <CriarTreinoForm />
+        {!isModoDemo() && <CriarTreinoForm />}
 
         <div className="mt-8 flex flex-col gap-3">
           {NOMES_DIAS.map((nomeDia, dia) => {

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { NOMES_DIAS, parseDiaSemana } from "@/lib/dias-semana";
+import { isModoDemo, TEXTO_MODO_DEMO } from "@/lib/demo";
 
 export type ExercicioResult = { ok: true } | { error: string };
 
@@ -24,6 +25,8 @@ function isUniqueViolation(e: unknown): boolean {
 export async function definirDiaTreino(
   formData: FormData,
 ): Promise<ExercicioResult> {
+  if (isModoDemo()) return { error: TEXTO_MODO_DEMO };
+
   const treinoId = String(formData.get("treinoId") ?? "");
   if (treinoId === "") {
     return { error: "Treino inválido" };
@@ -71,6 +74,8 @@ export async function definirDiaTreino(
 export async function adicionarExercicio(
   formData: FormData,
 ): Promise<ExercicioResult> {
+  if (isModoDemo()) return { error: TEXTO_MODO_DEMO };
+
   const treinoId = String(formData.get("treinoId") ?? "");
   const nome = String(formData.get("nome") ?? "").trim();
   const grupoMuscular = String(formData.get("grupoMuscular") ?? "").trim();
@@ -149,6 +154,8 @@ export async function adicionarExercicio(
 export async function removerExercicio(
   formData: FormData,
 ): Promise<ExercicioResult> {
+  if (isModoDemo()) return { error: TEXTO_MODO_DEMO };
+
   const treinoExercicioId = String(formData.get("treinoExercicioId") ?? "");
   const treinoId = String(formData.get("treinoId") ?? "");
 
@@ -178,6 +185,8 @@ export type DeletarTreinoResult =
 export async function deletarTreino(
   treinoId: string,
 ): Promise<DeletarTreinoResult> {
+  if (isModoDemo()) return { error: TEXTO_MODO_DEMO };
+
   if (treinoId === "") {
     return { error: "Treino inválido" };
   }
