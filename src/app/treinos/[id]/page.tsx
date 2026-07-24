@@ -4,6 +4,7 @@ import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { Container } from "@/components/container";
+import { isModoDemo } from "@/lib/demo";
 import { getTreino } from "@/lib/treinos";
 import { imagemDoTreino } from "@/lib/treino-imagem";
 import { iniciarSessao } from "@/app/sessoes/actions";
@@ -24,6 +25,8 @@ export default async function TreinoDetalhePage({
   if (!treino) notFound();
 
   const arquivado = treino.arquivado;
+  // Toda a UI de escrita da tela: some com o treino arquivado ou em modo demo.
+  const podeEditar = !arquivado && !isModoDemo();
 
   async function removerAction(formData: FormData) {
     "use server";
@@ -57,7 +60,7 @@ export default async function TreinoDetalhePage({
           </div>
         </Card>
 
-        {!arquivado && (
+        {podeEditar && (
           <>
             <EditarDiaForm treinoId={treino.id} diaSemana={treino.diaSemana} />
 
@@ -96,7 +99,7 @@ export default async function TreinoDetalhePage({
                       <Badge>{reps} reps</Badge>
                     </div>
                   </div>
-                  {!arquivado && (
+                  {podeEditar && (
                     <form action={removerAction}>
                       <input
                         type="hidden"
@@ -118,7 +121,7 @@ export default async function TreinoDetalhePage({
           </ul>
         )}
 
-        {!arquivado && (
+        {podeEditar && (
           <>
             <AdicionarExercicioForm treinoId={treino.id} />
             <DeletarTreinoForm treinoId={treino.id} />
