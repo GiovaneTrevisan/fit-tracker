@@ -4,7 +4,7 @@ import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { Container } from "@/components/container";
-import { isModoDemo } from "@/lib/demo";
+import { getDemoSessaoId, isModoDemo } from "@/lib/demo";
 import { getTreino } from "@/lib/treinos";
 import { imagemDoTreino } from "@/lib/treino-imagem";
 import { iniciarSessao } from "@/app/sessoes/actions";
@@ -27,6 +27,10 @@ export default async function TreinoDetalhePage({
   const arquivado = treino.arquivado;
   // Toda a UI de escrita da tela: some com o treino arquivado ou em modo demo.
   const podeEditar = !arquivado && !isModoDemo();
+  // "Iniciar treino" é exceção: em modo demo ele volta, levando à sessão de
+  // exemplo — mas só se houver uma configurada pra onde ir.
+  const podeIniciar =
+    !arquivado && (!isModoDemo() || getDemoSessaoId() !== null);
 
   async function removerAction(formData: FormData) {
     "use server";
@@ -61,14 +65,14 @@ export default async function TreinoDetalhePage({
         </Card>
 
         {podeEditar && (
-          <>
-            <EditarDiaForm treinoId={treino.id} diaSemana={treino.diaSemana} />
+          <EditarDiaForm treinoId={treino.id} diaSemana={treino.diaSemana} />
+        )}
 
-            <form action={iniciarAction} className="mt-4">
-              <input type="hidden" name="treinoId" value={treino.id} />
-              <Button type="submit">Iniciar treino</Button>
-            </form>
-          </>
+        {podeIniciar && (
+          <form action={iniciarAction} className="mt-4">
+            <input type="hidden" name="treinoId" value={treino.id} />
+            <Button type="submit">Iniciar treino</Button>
+          </form>
         )}
 
         {treino.exercicios.length === 0 ? (

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { isModoDemo, TEXTO_MODO_DEMO } from "@/lib/demo";
+import { getDemoSessaoId, isModoDemo, TEXTO_MODO_DEMO } from "@/lib/demo";
 
 /**
  * Inicia uma sessão para o treino. Idempotente por treino: se já existir uma
@@ -10,10 +10,16 @@ import { isModoDemo, TEXTO_MODO_DEMO } from "@/lib/demo";
  * redireciona para /sessoes/{id}. Valida no servidor.
  */
 export async function iniciarSessao(treinoId: string): Promise<never> {
-  // Recusa lançando (não retornando): a action termina em redirect, então não
-  // tem canal de erro — mesmo caminho das validações abaixo.
+  // Em modo demo não cria nada: manda pra sessão de exemplo, pra a demo mostrar
+  // a tela de execução. Sem a env configurada, recusa lançando (a action termina
+  // em redirect, então não tem canal de erro — mesmo caminho das validações
+  // abaixo): a env destrava só a navegação, nunca a criação.
   if (isModoDemo()) {
-    throw new Error(TEXTO_MODO_DEMO);
+    const demoSessaoId = getDemoSessaoId();
+    if (!demoSessaoId) {
+      throw new Error(TEXTO_MODO_DEMO);
+    }
+    redirect(`/sessoes/${demoSessaoId}`);
   }
 
   if (!treinoId) {
