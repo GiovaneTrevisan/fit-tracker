@@ -12,10 +12,11 @@
   --branco: #ffffff;
   --creme: #fef3eb;
   --laranja: #f06100;
-  --consist-1: #d5dffe;
-  --consist-2: #95a9ff;
-  --consist-3: #4569ff;
-  --consist-4: #2b54ff;
+  /* rampa de consistência: mesmo hue do --azul (228,4°), só a luminosidade desce */
+  --consist-1: #8098ff;
+  --consist-2: #5173ff;
+  --consist-3: #2b54ff;
+  --consist-4: #1339e0;
 
   /* semânticos (tema claro — o design não tem dark) */
   --cor-primaria: var(--azul); /* botões, nav ativa, acentos, links */

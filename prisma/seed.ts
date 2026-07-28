@@ -345,7 +345,11 @@ async function main() {
 
     for (let i = 0; i < totalDias; i++) {
       const cursorMs = primeiroDia + i * DIA_MS;
-      if (cursorMs >= ancoraHoje) break; // hoje fica pra sessão EM_ANDAMENTO
+      // Inclui o dia em que o seed roda. Deixá-lo só com a sessão EM_ANDAMENTO
+      // zerava o streak no dia seguinte: getStreak só perdoa a ausência de treino
+      // em "hoje", então o dia do seed virava um dia agendado sem CONCLUIDA — e,
+      // como o banco é estático, o buraco nunca se preenchia.
+      if (cursorMs > ancoraHoje) break;
 
       const cursor = new Date(cursorMs);
       const treino = porDiaSemana.get(cursor.getUTCDay());
