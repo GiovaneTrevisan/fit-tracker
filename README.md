@@ -74,6 +74,42 @@ npm run dev
 
 O app fica disponível em `http://localhost:3000`.
 
+## Banco de demonstração
+
+O deploy público de portfólio roda sobre um banco descartável populado por
+`prisma/seed.ts`: 4 treinos numa rotina de 4 dias, catálogo de exercícios reais, ~6
+meses de sessões concluídas com progressão de carga (incluindo uma semana de férias e
+faltas esparsas, pro heatmap não parecer sintético) e uma sessão `EM_ANDAMENTO` de
+exemplo com id fixo `demo-sessao-exemplo`, pra onde `DEMO_SESSAO_ID` aponta.
+
+> **O seed APAGA TUDO antes de popular.** A trava é a env `SEED_DEMO="true"` — sem ela
+> o script aborta sem tocar no banco. Nunca defina essa variável em produção.
+
+Para (re)popular, confirme que o `.env` aponta para o banco de demonstração — o script
+imprime o host e o database antes de qualquer escrita — e rode:
+
+```bash
+# opção 1: descomentar SEED_DEMO="true" no .env
+npm run db:seed
+
+# opção 2: só nesta execução (bash)
+SEED_DEMO=true npm run db:seed
+
+# opção 2: só nesta execução (PowerShell)
+$env:SEED_DEMO="true"; npm run db:seed
+```
+
+É idempotente no sentido que importa: pode rodar quantas vezes quiser, e rodar duas
+vezes no mesmo dia produz o mesmo banco (a aleatoriedade vem de um PRNG com semente
+fixa). O `DEMO_SESSAO_ID` não muda entre re-seeds.
+
+**Re-seede a cada ~3 dias** para manter a demo apresentável. O histórico é estático
+mas o app é ancorado em "hoje": o streak quebra no primeiro dia agendado que passa sem
+sessão concluída, e não há como gerar sessão no futuro. O seed compensa alinhando a
+escala de treinos ao dia em que roda, o que segura o streak por 4 dias (o dia do seed
+e mais três) — depois disso ele zera. Os detalhes estão no cabeçalho de
+`prisma/seed.ts`.
+
 ## Scripts
 
 - `npm run dev` — servidor de desenvolvimento
@@ -81,3 +117,4 @@ O app fica disponível em `http://localhost:3000`.
 - `npm run start` — servir o build de produção
 - `npm run lint` — checagem de lint
 - `npm run db:studio` — abrir o Prisma Studio para inspecionar o banco
+- `npm run db:seed` — repopular o banco de demonstração (destrutivo; exige `SEED_DEMO`)
