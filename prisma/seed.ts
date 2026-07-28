@@ -9,7 +9,22 @@
  * NUNCA rodar contra produção: o script APAGA TUDO antes de popular. A trava é a
  * env SEED_DEMO="true" — sem ela o script aborta sem tocar no banco.
  *
- * Rodar:  SEED_DEMO=true npx prisma db seed
+ * Rodar:  SEED_DEMO=true npx prisma db seed   (ver "Banco de demonstração" no README)
+ *
+ * ---------------------------------------------------------------------------
+ * Por que a escala é RELATIVA ao dia em que o seed roda
+ * ---------------------------------------------------------------------------
+ * O banco é estático, mas o app é ancorado em "hoje" — então a demo envelhece.
+ * Quem sofre é o streak: getStreak (src/lib/estatisticas.ts) caminha de hoje pra
+ * trás e quebra no primeiro dia agendado sem sessão concluída, perdoando só o
+ * próprio dia de hoje. Rodado o seed no dia D e aberta a demo no dia T, o streak
+ * só sobrevive se NENHUM dia agendado cair em {D+1, …, T-1}.
+ *
+ * Como não dá pra gerar sessão no futuro, a única alavanca é quais dias da semana
+ * são agendados — e é este script que cria os treinos. Daí ESCALA (abaixo) ser
+ * uma lista de offsets em vez de dias fixos: o bloco de treinos termina sempre no
+ * dia do seed, deixando D+1 e D+2 livres. O streak fica cheio em D, D+1, D+2 e
+ * D+3, e só zera em D+4 — ou seja, a demo aguenta ~3 dias sem re-seed.
  */
 
 import { PrismaClient } from "@prisma/client";
@@ -24,8 +39,12 @@ const SEMANAS = 26;
 /** Semana (0-based) em que "viajei": nenhum treino, pra o heatmap ter um buraco. */
 const SEMANA_FERIAS = 11;
 
-/** Nas últimas N semanas não há faltas — mantém o streak da tela inicial bonito. */
-const SEMANAS_SEM_FALTA = 3;
+/**
+ * Nos últimos N dias agendados não há faltas — é o que sustenta o streak da tela
+ * inicial. Contado em dias agendados, não em semanas: é essa a unidade que o
+ * getStreak percorre.
+ */
+const DIAS_AGENDADOS_SEM_FALTA = 12;
 
 /** Chance de faltar num dia de treino isolado, fora da janela protegida. */
 const CHANCE_FALTA = 0.12;
@@ -116,15 +135,20 @@ const CATALOGO: DefExercicio[] = [
 const PORNOME = new Map(CATALOGO.map((e) => [e.nome, e]));
 
 /**
- * Os 4 treinos da rotina. `diaSemana` segue a convenção do app (0=Domingo …
- * 6=Sábado) e o schema tem @@unique([diaSemana]) — por isso os quatro dias são
- * distintos. Os nomes casam com os slugs de src/lib/treino-imagem.ts, senão os
- * cards perdem a imagem de fundo.
+ * Os 4 treinos da rotina. `diasAtras` é a posição do treino em relação ao dia em
+ * que o seed roda, não um dia da semana fixo — ver a nota sobre a escala relativa
+ * no topo do arquivo. O padrão é o mesmo de sempre (2 dias on, 1 off, 2 on, 2
+ * off), só girado pra terminar no dia do seed: rodando numa sexta, sai
+ * exatamente seg/ter/qui/sex.
+ *
+ * Os offsets são distintos e todos < 7, então os `diaSemana` derivados também são
+ * distintos — o schema tem @@unique([diaSemana]). Os nomes casam com os slugs de
+ * src/lib/treino-imagem.ts, senão os cards perdem a imagem de fundo.
  */
-const TREINOS: { nome: string; diaSemana: number; exercicios: string[] }[] = [
+const TREINOS: { nome: string; diasAtras: number; exercicios: string[] }[] = [
   {
     nome: "Superior",
-    diaSemana: 1, // segunda
+    diasAtras: 4,
     exercicios: [
       "Supino reto com barra",
       "Supino inclinado com halteres",
@@ -136,7 +160,7 @@ const TREINOS: { nome: string; diaSemana: number; exercicios: string[] }[] = [
   },
   {
     nome: "Inferior",
-    diaSemana: 2, // terça
+    diasAtras: 3,
     exercicios: [
       "Agachamento livre",
       "Leg press 45°",
@@ -147,7 +171,7 @@ const TREINOS: { nome: string; diaSemana: number; exercicios: string[] }[] = [
   },
   {
     nome: "Superior 2",
-    diaSemana: 4, // quinta
+    diasAtras: 1,
     exercicios: [
       "Puxada frontal",
       "Remada curvada",
@@ -159,7 +183,7 @@ const TREINOS: { nome: string; diaSemana: number; exercicios: string[] }[] = [
   },
   {
     nome: "Inferior 2",
-    diaSemana: 5, // sexta
+    diasAtras: 0, // o dia em que o seed roda
     exercicios: [
       "Levantamento terra",
       "Stiff",
@@ -279,6 +303,21 @@ async function main() {
     await prisma.treino.deleteMany();
     await prisma.exercicio.deleteMany();
 
+    // --- Calendário ----------------------------------------------------------
+    // Âncora de meia-noite UTC de uma data-calendário SP: aritmética de dia pura,
+    // imune a DST (mesmo padrão de getStreak em src/lib/estatisticas.ts).
+    const hoje = hojeEmSP();
+    const ancoraHoje = Date.UTC(hoje.ano, hoje.mes - 1, hoje.dia);
+    const diaDoSeed = new Date(ancoraHoje).getUTCDay();
+    const totalDias = SEMANAS * 7;
+    const primeiroDia = ancoraHoje - (totalDias - 1) * DIA_MS;
+
+    /** Dia da semana de um treino, derivado do dia em que o seed está rodando. */
+    const diaSemanaDe = (t: { diasAtras: number }) =>
+      (diaDoSeed - t.diasAtras + 7) % 7;
+
+    const porDiaSemana = new Map(TREINOS.map((t) => [diaSemanaDe(t), t]));
+
     // --- Catálogo e treinos --------------------------------------------------
     console.log("Criando catálogo e treinos…");
     const exercicios = await prisma.exercicio.createManyAndReturn({
@@ -291,7 +330,7 @@ async function main() {
     const idExercicio = new Map(exercicios.map((e) => [e.nome, e.id]));
 
     const treinos = await prisma.treino.createManyAndReturn({
-      data: TREINOS.map((t) => ({ nome: t.nome, diaSemana: t.diaSemana })),
+      data: TREINOS.map((t) => ({ nome: t.nome, diaSemana: diaSemanaDe(t) })),
       select: { id: true, nome: true },
     });
     const idTreino = new Map(treinos.map((t) => [t.nome, t.id]));
@@ -312,24 +351,29 @@ async function main() {
       ),
     });
 
-    // --- Calendário ----------------------------------------------------------
-    // Âncora de meia-noite UTC de uma data-calendário SP: aritmética de dia pura,
-    // imune a DST (mesmo padrão de getStreak em src/lib/estatisticas.ts).
-    const hoje = hojeEmSP();
-    const ancoraHoje = Date.UTC(hoje.ano, hoje.mes - 1, hoje.dia);
-    const totalDias = SEMANAS * 7;
-    const primeiroDia = ancoraHoje - (totalDias - 1) * DIA_MS;
-
-    const porDiaSemana = new Map(TREINOS.map((t) => [t.diaSemana, t]));
-
-    /** Instante de uma sessão: ~19h no fuso SP do dia-calendário do cursor. */
-    function instanteDaSessao(cursor: Date, minutosApos19h: number): Date {
+    /**
+     * Instante de uma sessão: ~19h no fuso SP do dia-calendário do cursor.
+     *
+     * `margemMin` é o teto pro dia em que o seed roda: uma sessão não pode nascer
+     * no futuro, então se ainda não passou das 19h ela recua pra `margemMin`
+     * minutos atrás. Dias passados nunca caem nesse caso — as 19h deles já foram.
+     */
+    function instanteDaSessao(
+      cursor: Date,
+      minutosApos19h: number,
+      margemMin = 0,
+    ): Date {
       const meiaNoiteSP = inicioDoDiaSP(
         cursor.getUTCFullYear(),
         cursor.getUTCMonth() + 1,
         cursor.getUTCDate(),
-      );
-      return new Date(meiaNoiteSP.getTime() + (19 * 60 + minutosApos19h) * 60_000);
+      ).getTime();
+      const alvo = meiaNoiteSP + (19 * 60 + minutosApos19h) * 60_000;
+      const teto = Date.now() - margemMin * 60_000;
+      if (alvo <= teto) return new Date(alvo);
+      // O piso na meia-noite impede escapar pro dia anterior se o seed rodar
+      // logo depois da virada.
+      return new Date(Math.max(meiaNoiteSP, teto));
     }
 
     // --- Sessões concluídas --------------------------------------------------
@@ -343,26 +387,40 @@ async function main() {
     }
     const planejadas: SessaoNova[] = [];
 
+    // Todos os dias agendados do intervalo, incluindo o dia do seed. Deixá-lo de
+    // fora zerava o streak no dia seguinte: ele viraria um dia agendado sem
+    // CONCLUIDA, e num banco estático esse buraco nunca se preenche.
+    const diasAgendados: number[] = [];
     for (let i = 0; i < totalDias; i++) {
       const cursorMs = primeiroDia + i * DIA_MS;
-      // Inclui o dia em que o seed roda. Deixá-lo só com a sessão EM_ANDAMENTO
-      // zerava o streak no dia seguinte: getStreak só perdoa a ausência de treino
-      // em "hoje", então o dia do seed virava um dia agendado sem CONCLUIDA — e,
-      // como o banco é estático, o buraco nunca se preenchia.
       if (cursorMs > ancoraHoje) break;
+      if (porDiaSemana.has(new Date(cursorMs).getUTCDay())) {
+        diasAgendados.push(cursorMs);
+      }
+    }
+    // A ponta protegida: nos últimos DIAS_AGENDADOS_SEM_FALTA dias agendados não
+    // se falta, pra o streak da tela inicial nascer alto.
+    const inicioProtegido =
+      diasAgendados[diasAgendados.length - DIAS_AGENDADOS_SEM_FALTA] ?? -Infinity;
 
+    for (const cursorMs of diasAgendados) {
       const cursor = new Date(cursorMs);
-      const treino = porDiaSemana.get(cursor.getUTCDay());
-      if (!treino) continue; // dia livre
+      const treino = porDiaSemana.get(cursor.getUTCDay())!;
 
-      const semana = Math.floor(i / 7);
+      const semana = Math.floor((cursorMs - primeiroDia) / DIA_MS / 7);
       if (semana === SEMANA_FERIAS) continue; // semana de viagem
-      const protegida = semana >= SEMANAS - SEMANAS_SEM_FALTA;
-      if (!protegida && rng() < CHANCE_FALTA) continue; // falta isolada
+      const protegido = cursorMs >= inicioProtegido;
+      if (!protegido && rng() < CHANCE_FALTA) continue; // falta isolada
 
       planejadas.push({
         treinoNome: treino.nome,
-        data: instanteDaSessao(cursor, inteiroEntre(0, 59)),
+        // Só o dia do seed precisa do teto; a margem afasta a concluída de hoje
+        // da sessão EM_ANDAMENTO de exemplo, que nasce mais perto de agora.
+        data: instanteDaSessao(
+          cursor,
+          inteiroEntre(0, 59),
+          cursorMs === ancoraHoje ? 90 : 0,
+        ),
         duracaoMin: inteiroEntre(45, 75),
         semana,
       });
@@ -407,16 +465,17 @@ async function main() {
     }
 
     // --- Sessão EM_ANDAMENTO de exemplo --------------------------------------
-    // Se hoje é dia de treino, é o treino de hoje; senão, o do próximo dia
-    // agendado — a sessão fica com a data de hoje de qualquer forma.
-    const diaHoje = new Date(ancoraHoje).getUTCDay();
-    let treinoDemo = porDiaSemana.get(diaHoje);
-    for (let d = 1; !treinoDemo && d <= 7; d++) {
-      treinoDemo = porDiaSemana.get((diaHoje + d) % 7);
-    }
-    const treinoExemplo = treinoDemo!;
+    // A escala termina no dia do seed (diasAtras: 0), então hoje é sempre dia de
+    // treino e o exemplo é o treino de hoje.
+    const treinoExemplo = porDiaSemana.get(diaDoSeed)!;
 
-    const dataExemplo = instanteDaSessao(new Date(ancoraHoje), inteiroEntre(0, 40));
+    // Margem menor que a da concluída de hoje: a sessão em andamento é a mais
+    // recente, e nenhuma das duas nasce no futuro.
+    const dataExemplo = instanteDaSessao(
+      new Date(ancoraHoje),
+      inteiroEntre(0, 40),
+      20,
+    );
     await prisma.sessao.create({
       data: {
         id: ID_SESSAO_EXEMPLO,
