@@ -6,6 +6,11 @@
  * exercícios reais, sessões concluídas com progressão de carga e uma sessão
  * EM_ANDAMENTO fixa pra onde o DEMO_SESSAO_ID aponta.
  *
+ * A sessão de exemplo fica no treino MAIS ANTIGO da escala, não no de hoje: é o
+ * que faz a "última vez" de cada exercício dela apontar pra dias atrás, com carga
+ * menor. No treino de hoje ela competiria com a concluída do próprio dia e a tela
+ * viraria uma comparação com hoje mesmo — que é justo o oposto da ideia.
+ *
  * NUNCA rodar contra produção: o script APAGA TUDO antes de popular. A trava é a
  * env SEED_DEMO="true" — sem ela o script aborta sem tocar no banco.
  *
@@ -229,14 +234,20 @@ interface SerieNova {
   reps: number;
 }
 
-/** Séries de um exercício dentro de uma sessão: `numero` é 1-based por exercício. */
+/**
+ * Séries de um exercício dentro de uma sessão: `numero` é 1-based por exercício.
+ *
+ * `cargaFixa` sobrepõe a carga da semana — usado só pela sessão de exemplo, que
+ * precisa de uma carga derivada da última vez, e não da curva do histórico.
+ */
 function seriesDoExercicio(
   def: DefExercicio,
   sessaoId: string,
   exercicioId: string,
   semana: number,
+  cargaFixa?: number,
 ): SerieNova[] {
-  const carga = cargaNaSemana(def, semana);
+  const carga = cargaFixa ?? cargaNaSemana(def, semana);
   return Array.from({ length: def.seriesAlvo }, (_, i) => ({
     sessaoId,
     exercicioId,
@@ -443,18 +454,27 @@ async function main() {
     const idPorInstante = new Map(criadas.map((s) => [s.data.getTime(), s.id]));
 
     const series: SerieNova[] = [];
+    /**
+     * exercicioId → carga da sessão concluída mais recente que o incluiu, que é
+     * o que o app mostra como "última vez". `planejadas` está em ordem
+     * cronológica, então a última escrita vence — inclusive para exercícios
+     * reaproveitados entre treinos, que é a semântica do getUltimaVez (global,
+     * não por treino).
+     */
+    const cargaUltimaVez = new Map<string, number>();
     for (const s of planejadas) {
       const sessaoId = idPorInstante.get(s.data.getTime())!;
       const treino = TREINOS.find((t) => t.nome === s.treinoNome)!;
       for (const nome of treino.exercicios) {
-        series.push(
-          ...seriesDoExercicio(
-            PORNOME.get(nome)!,
-            sessaoId,
-            idExercicio.get(nome)!,
-            s.semana,
-          ),
+        const exercicioId = idExercicio.get(nome)!;
+        const doExercicio = seriesDoExercicio(
+          PORNOME.get(nome)!,
+          sessaoId,
+          exercicioId,
+          s.semana,
         );
+        series.push(...doExercicio);
+        cargaUltimaVez.set(exercicioId, doExercicio[0].carga);
       }
     }
 
@@ -465,9 +485,14 @@ async function main() {
     }
 
     // --- Sessão EM_ANDAMENTO de exemplo --------------------------------------
-    // A escala termina no dia do seed (diasAtras: 0), então hoje é sempre dia de
-    // treino e o exemplo é o treino de hoje.
-    const treinoExemplo = porDiaSemana.get(diaDoSeed)!;
+    // O treino MAIS ANTIGO da escala, não o de hoje: assim a "última vez" de cada
+    // exercício dela cai na concluída de vários dias atrás, com carga menor — que
+    // é o conceito que a demo precisa vender. O treino de hoje continua com a sua
+    // concluída (é ela que segura o streak); ele é que não pode ser o do exemplo,
+    // senão a comparação apontaria pro próprio dia.
+    const treinoExemplo = TREINOS.reduce((a, b) =>
+      b.diasAtras > a.diasAtras ? b : a,
+    );
 
     // Margem menor que a da concluída de hoje: a sessão em andamento é a mais
     // recente, e nenhuma das duas nasce no futuro.
@@ -488,16 +513,25 @@ async function main() {
 
     // Só os 2 primeiros exercícios já têm série anotada: o resto fica pendente,
     // que é o estado interessante pra demo (mostra o "última vez" preenchido).
+    //
+    // A carga é a da última vez MAIS um incremento, não a da curva do histórico:
+    // as duas cairiam na mesma semana e sairiam empatadas (ou menores, pelo "dia
+    // ruim" do cargaNaSemana). Aqui a progressão é sempre visível ao lado do card
+    // "última vez", que é o ponto da tela.
     const seriesExemplo = treinoExemplo.exercicios
       .slice(0, 2)
-      .flatMap((nome) =>
-        seriesDoExercicio(
-          PORNOME.get(nome)!,
+      .flatMap((nome) => {
+        const def = PORNOME.get(nome)!;
+        const exercicioId = idExercicio.get(nome)!;
+        const anterior = cargaUltimaVez.get(exercicioId) ?? def.cargaInicial;
+        return seriesDoExercicio(
+          def,
           ID_SESSAO_EXEMPLO,
-          idExercicio.get(nome)!,
+          exercicioId,
           SEMANAS - 1,
-        ),
-      );
+          anterior + def.incremento,
+        );
+      });
     await prisma.serieRegistrada.createMany({ data: seriesExemplo });
 
     // --- Resumo --------------------------------------------------------------
