@@ -77,7 +77,7 @@ O app fica disponível em `http://localhost:3000`.
 ## Banco de demonstração
 
 O deploy público de portfólio roda sobre um banco descartável populado por
-`prisma/seed.ts`: 4 treinos numa rotina de 4 dias, catálogo de exercícios reais, ~6
+`src/lib/seed-demo.ts`: 4 treinos numa rotina de 4 dias, catálogo de exercícios reais, ~6
 meses de sessões concluídas com progressão de carga (incluindo uma semana de férias e
 faltas esparsas, pro heatmap não parecer sintético) e uma sessão `EM_ANDAMENTO` de
 exemplo com id fixo `demo-sessao-exemplo`, pra onde `DEMO_SESSAO_ID` aponta.
@@ -103,12 +103,34 @@ $env:SEED_DEMO="true"; npm run db:seed
 vezes no mesmo dia produz o mesmo banco (a aleatoriedade vem de um PRNG com semente
 fixa). O `DEMO_SESSAO_ID` não muda entre re-seeds.
 
-**Re-seede a cada ~3 dias** para manter a demo apresentável. O histórico é estático
-mas o app é ancorado em "hoje": o streak quebra no primeiro dia agendado que passa sem
-sessão concluída, e não há como gerar sessão no futuro. O seed compensa alinhando a
-escala de treinos ao dia em que roda, o que segura o streak por 4 dias (o dia do seed
-e mais três) — depois disso ele zera. Os detalhes estão no cabeçalho de
-`prisma/seed.ts`.
+### Por que a demo precisa de re-seed
+
+O histórico é estático mas o app é ancorado em "hoje": o streak quebra no primeiro dia
+agendado que passa sem sessão concluída, e não há como gerar sessão no futuro. O seed
+compensa alinhando a escala de treinos ao dia em que roda, o que segura o streak por 4
+dias (o dia do seed e mais três) — depois disso ele zera. Os detalhes estão no cabeçalho
+de `src/lib/seed-demo.ts`.
+
+### Cron diário (Vercel)
+
+Quem cobre essa janela é um cron job agendado em `vercel.json`, que chama `/api/reseed`
+todo dia às 6h UTC (≈3h de Brasília). No plano Hobby o disparo é **"dentro da hora"**
+agendada e limitado a uma vez por dia — as duas coisas são esperadas, não falha.
+
+A rota roda a mesma lógica de `npm run db:seed` (nenhuma duplicação: as duas importam
+`seedDemo()` de `src/lib/seed-demo.ts`) e responde um JSON com as contagens do que criou,
+que fica visível nos logs da função. Como ela apaga tudo antes de popular, são três
+camadas — todas obrigatórias, verificadas antes de qualquer acesso ao banco:
+
+1. **Ambiente** — só prossegue com `MODO_DEMO="true"`; fora do modo demo devolve 404.
+2. **Chamador** — exige o header `Authorization: Bearer $CRON_SECRET`, que a Vercel injeta
+   nos crons. Sem `CRON_SECRET` no ambiente, ou sem o header, é 401 sem tocar no banco.
+3. **Banco** — é o do próprio deploy (`DIRECT_URL`/`DATABASE_URL`). A rota não lê query
+   param nem body, então não há como apontá-la para outro banco.
+
+Para ativar num deploy novo, basta definir `CRON_SECRET` nas variáveis de ambiente do
+projeto na Vercel. O `npm run db:seed` continua sendo o caminho manual — o cron é um
+caminho adicional, não um substituto.
 
 ## Scripts
 
