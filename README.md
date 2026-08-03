@@ -4,7 +4,7 @@ App pessoal de acompanhamento de treinos de academia. O foco é comparar cada tr
 com a última vez que o mesmo exercício foi feito, para acompanhar a evolução de carga
 e repetições ao longo do tempo.
 
-Deploy: [URL do deploy]
+Deploy: https://fit-tracker-demo.vercel.app/
 
 ## Funcionalidades
 
