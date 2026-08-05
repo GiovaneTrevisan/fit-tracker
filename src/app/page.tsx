@@ -8,6 +8,7 @@ import { tomConsistencia } from "@/lib/consistencia";
 import { chaveDia, hojeEmSP } from "@/lib/data-sp";
 import { NOMES_DIAS } from "@/lib/dias-semana";
 import { getHeatmapAno, getStreak, getTotalTreinos } from "@/lib/estatisticas";
+import { getSessaoEmAndamento } from "@/lib/sessoes";
 import { getTreinoDeHoje } from "@/lib/treinos";
 import { imagemDoTreino } from "@/lib/treino-imagem";
 
@@ -95,44 +96,63 @@ function rotulosDeMes(celulas: (Date | null)[]): (string | null)[] {
 
 export default async function Home() {
   const { ano } = hojeEmSP();
-  const [treinoDeHoje, total, streak, heatmap] = await Promise.all([
+  const [treinoDeHoje, sessaoEmAndamento, total, streak, heatmap] = await Promise.all([
     getTreinoDeHoje(),
+    getSessaoEmAndamento(),
     getTotalTreinos(),
     getStreak(),
     getHeatmapAno(ano),
   ]);
   const celulas = celulasDoAno(ano);
   const imgHoje = treinoDeHoje ? imagemDoTreino(treinoDeHoje.nome) : null;
+  const imgContinuar = sessaoEmAndamento
+    ? imagemDoTreino(sessaoEmAndamento.treinoNome)
+    : null;
 
   return (
     <div className="flex flex-1 flex-col items-center bg-zinc-50 font-sans">
       <main className="flex w-full flex-1 flex-col">
         <Container className="flex flex-1 flex-col gap-6 bg-white py-12">
-          <Card variante="forte" imagem={imgHoje} prioridade>
-            <Rotulo tom="sobre-escuro">Treino de Hoje</Rotulo>
-            {treinoDeHoje ? (
-              <>
-                <div className="mt-2 flex flex-wrap items-center gap-3">
-                  <p className="text-hero font-semibold">
-                    {treinoDeHoje.nome}
-                  </p>
-                  <Badge variante="escuro">
-                    {NOMES_DIAS[treinoDeHoje.diaSemana]}
-                  </Badge>
-                </div>
-                <Link
-                  href={`/treinos/${treinoDeHoje.id}`}
-                  className={`${estilosBotao.base} ${estilosBotao.primaria} mt-5`}
-                >
-                  Ver treino
-                </Link>
-              </>
-            ) : (
+          {sessaoEmAndamento ? (
+            <Card variante="forte" imagem={imgContinuar} prioridade>
+              <Rotulo tom="sobre-escuro">Continuar treino</Rotulo>
               <p className="mt-2 text-hero font-semibold">
-                Descanso hoje
+                {sessaoEmAndamento.treinoNome}
               </p>
-            )}
-          </Card>
+              <Link
+                href={`/sessoes/${sessaoEmAndamento.id}`}
+                className={`${estilosBotao.base} ${estilosBotao.primaria} mt-5`}
+              >
+                Continuar
+              </Link>
+            </Card>
+          ) : (
+            <Card variante="forte" imagem={imgHoje} prioridade>
+              <Rotulo tom="sobre-escuro">Treino de Hoje</Rotulo>
+              {treinoDeHoje ? (
+                <>
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <p className="text-hero font-semibold">
+                      {treinoDeHoje.nome}
+                    </p>
+                    <Badge variante="escuro">
+                      {NOMES_DIAS[treinoDeHoje.diaSemana]}
+                    </Badge>
+                  </div>
+                  <Link
+                    href={`/treinos/${treinoDeHoje.id}`}
+                    className={`${estilosBotao.base} ${estilosBotao.primaria} mt-5`}
+                  >
+                    Ver treino
+                  </Link>
+                </>
+              ) : (
+                <p className="mt-2 text-hero font-semibold">
+                  Descanso hoje
+                </p>
+              )}
+            </Card>
+          )}
 
           <Card>
             <Rotulo>Estatísticas</Rotulo>

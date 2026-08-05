@@ -121,3 +121,26 @@ export async function getSessao(id: string): Promise<SessaoDetalhe | null> {
     exercicios: [...doPlano, ...avulsos],
   };
 }
+
+export interface SessaoEmAndamento {
+  id: string;
+  treinoId: string;
+  treinoNome: string;
+}
+
+/**
+ * Sessão EM_ANDAMENTO mais recente (de qualquer treino), se houver — pra home
+ * oferecer "Continuar treino" quando o usuário saiu no meio de uma sessão. Se
+ * houver mais de uma aberta (caso raro), pega a mais recente por `data`.
+ */
+export async function getSessaoEmAndamento(): Promise<SessaoEmAndamento | null> {
+  const sessao = await prisma.sessao.findFirst({
+    where: { status: "EM_ANDAMENTO" },
+    orderBy: { data: "desc" },
+    select: { id: true, treinoId: true, treino: { select: { nome: true } } },
+  });
+
+  if (!sessao) return null;
+
+  return { id: sessao.id, treinoId: sessao.treinoId, treinoNome: sessao.treino.nome };
+}
